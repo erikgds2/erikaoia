@@ -14,7 +14,7 @@ import (
 
 const (
 	defaultPort  = "8080"
-	defaultModel = "llama3.2"
+	defaultModel = "llama3.2:latest"
 	ollamaBase   = "http://localhost:11434"
 	logPath      = "queries.json"
 	systemPrompt = `Você é uma IA criada pelo erikao. Responda sempre em português brasileiro, de forma concisa e direta. Seja levemente irônico e bem-humorado, mas genuinamente útil. Quando não souber algo, admita com humor. Evite respostas muito longas — prefira precisão. Você roda localmente no PC do erikao via Ollama.`
