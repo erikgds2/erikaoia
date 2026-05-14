@@ -308,16 +308,34 @@ canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
 const isLocal = ['localhost','127.0.0.1'].includes(location.hostname);
 let BACKEND = '';  // base URL for API calls — empty = relative (local Go server)
 
+/* ── timeout-safe fetch (compativel com todos os browsers) ── */
+function fetchTimeout(url, opts, ms) {
+  ms = ms || 8000;
+  return new Promise(function(resolve, reject) {
+    var done = false;
+    var tid = setTimeout(function() {
+      if (!done) { done = true; reject(new Error('timeout')); }
+    }, ms);
+    fetch(url, opts).then(function(r) {
+      if (!done) { done = true; clearTimeout(tid); resolve(r); }
+    }).catch(function(e) {
+      if (!done) { done = true; clearTimeout(tid); reject(e); }
+    });
+  });
+}
+
 async function resolveBackend() {
   if (isLocal) { BACKEND = ''; return true; }
   try {
-    const cfg = await fetch('/config.json').then(r => r.json());
+    var cfgResp = await fetchTimeout('/config.json', {}, 5000);
+    var cfg = await cfgResp.json();
     if (!cfg.backend) return false;
     BACKEND = cfg.backend.replace(/\/$/, '');
-    // test reachability
-    const r = await fetch(BACKEND + '/api/status', {signal: AbortSignal.timeout(5000)});
+    var r = await fetchTimeout(BACKEND + '/api/status', {}, 8000);
     return r.ok;
-  } catch { return false; }
+  } catch(e) {
+    return false;
+  }
 }
 
 async function apiChat(message, model) {
@@ -330,12 +348,12 @@ async function apiChat(message, model) {
 }
 
 async function apiStatus() {
-  const r = await fetch(BACKEND + '/api/status', {signal: AbortSignal.timeout(4000)});
+  var r = await fetchTimeout(BACKEND + '/api/status', {}, 6000);
   return r.json();
 }
 
 async function apiModels() {
-  const r = await fetch(BACKEND + '/api/models', {signal: AbortSignal.timeout(4000)});
+  var r = await fetchTimeout(BACKEND + '/api/models', {}, 6000);
   return r.json();
 }
 
@@ -530,9 +548,10 @@ document.getElementById('inp').addEventListener('keydown', e => { if(e.key==='En
 
 /* ── boot ────────────────────────────────────────────── */
 async function boot() {
-  // start with input disabled until we know server state
   document.getElementById('inp').disabled = true;
   document.getElementById('btn').disabled = true;
+
+  addLine('conectando...', 'dim');
 
   const online = await resolveBackend();
   setOnlineUI(online);
@@ -540,11 +559,17 @@ async function boot() {
   if (online) {
     await updateStatus();
     if (isLocal) await loadModels();
+    // limpa o "conectando..." e mostra boas-vindas
+    document.getElementById('log').innerHTML = '';
     await addLine('─'.repeat(48), 'dim', 0);
     await addLine('ia criada pelo erikao. pode perguntar qualquer coisa.', 'bright', 200);
     await addLine('─'.repeat(48), 'dim', 500);
+  } else {
+    // mostra o motivo no log também (visível mesmo com overlay)
+    const url = BACKEND || '(backend não configurado)';
+    addLine('// backend: ' + url, 'dim');
+    addLine('// nao foi possivel conectar ao servidor.', 'muted');
   }
-  // if offline, the #offline overlay is shown by setOnlineUI
 }
 
 /* ── periodic status check ───────────────────────────── */
