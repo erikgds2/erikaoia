@@ -1,0 +1,22 @@
+# build
+erikaoia
+erikaoia.exe
+
+# runtime data
+queries.json
+
+# env
+.env
+.env.local
+
+# Go
+*.test
+*.out
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>erikao :: admin logs</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0c0c0c;--bg2:#111;--bg3:#161616;
+  --fg:#b0b0b0;--fg-dim:#404040;--fg-bright:#e8e8e8;
+  --border:#1e1e1e;--border-hi:#2e2e2e;
+  --muted:#606060;--green:#4ec94e;--red:#e05050;--yellow:#c8a84b;
+  --font:'Share Tech Mono',monospace;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:12px;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);pointer-events:none;z-index:999;}
+
+/* topbar */
+.topbar{border-bottom:1px solid var(--border);padding:0 16px;height:38px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:10;}
+.topbar-brand{color:var(--fg-bright);letter-spacing:1px;font-size:12px;}
+.topbar-brand .sep{color:var(--fg-dim);margin:0 6px;}
+.topbar-right{display:flex;gap:8px;align-items:center;}
+
+/* btn */
+.btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--font);font-size:11px;padding:4px 12px;cursor:pointer;letter-spacing:1px;transition:all .15s;}
+.btn:hover{border-color:var(--border-hi);color:var(--fg-bright);}
+.btn.danger:hover{border-color:var(--red);color:var(--red);}
+
+/* stats bar */
+.stats{border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:24px;flex-wrap:wrap;background:var(--bg2);}
+.stat{display:flex;flex-direction:column;gap:2px;}
+.stat-label{font-size:10px;color:var(--fg-dim);letter-spacing:1px;text-transform:uppercase;}
+.stat-value{font-size:18px;color:var(--fg-bright);letter-spacing:2px;}
+.stat-value.green{color:var(--green);}
+.stat-value.yellow{color:var(--yellow);}
+
+/* filter bar */
+.filterbar{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+#search{background:var(--bg2);border:1px solid var(--border);color:var(--fg-bright);font-family:var(--font);font-size:12px;padding:5px 10px;outline:none;width:240px;}
+#search::placeholder{color:var(--fg-dim);}
+#search:focus{border-color:var(--border-hi);}
+#model-filter{background:var(--bg2);border:1px solid var(--border);color:var(--muted);font-family:var(--font);font-size:11px;padding:5px 8px;outline:none;cursor:pointer;}
+.filter-label{font-size:10px;color:var(--fg-dim);letter-spacing:1px;}
+#count-label{font-size:10px;color:var(--muted);margin-left:auto;}
+
+/* table */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead{position:sticky;top:38px;z-index:5;}
+th{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 12px;text-align:left;font-size:10px;color:var(--fg-dim);letter-spacing:2px;text-transform:uppercase;white-space:nowrap;cursor:pointer;user-select:none;}
+th:hover{color:var(--fg);}
+th .sort-icon{margin-left:4px;opacity:.4;}
+th.sorted .sort-icon{opacity:1;color:var(--fg-bright);}
+tr{border-bottom:1px solid var(--border);}
+tr:hover td{background:var(--bg3);}
+td{padding:9px 12px;vertical-align:top;font-size:11px;}
+td.id{color:var(--fg-dim);width:40px;}
+td.ts{color:var(--muted);white-space:nowrap;width:140px;}
+td.model-col{color:var(--fg-dim);width:120px;}
+td.dur{color:var(--muted);width:80px;text-align:right;}
+td.dur span.fast{color:var(--green);}
+td.dur span.slow{color:var(--yellow);}
+td.question{color:var(--fg-bright);max-width:280px;}
+td.answer{color:var(--fg);max-width:320px;}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
+.expand-btn{background:none;border:none;color:var(--fg-dim);cursor:pointer;font-family:var(--font);font-size:10px;padding:0;margin-top:3px;display:block;}
+.expand-btn:hover{color:var(--fg-bright);}
+.full-text{display:none;white-space:pre-wrap;word-break:break-word;margin-top:4px;color:var(--fg);line-height:1.7;}
+.full-text.open{display:block;}
+
+/* empty state */
+.empty{padding:48px 16px;text-align:center;color:var(--fg-dim);}
+.empty .code{font-size:24px;color:var(--border-hi);margin-bottom:12px;}
+
+/* loading */
+.loading{padding:24px;text-align:center;color:var(--fg-dim);}
+
+/* detail modal */
+#detail-modal{position:fixed;inset:0;background:rgba(12,12,12,.92);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
+#detail-modal.open{display:flex;}
+.detail-box{background:var(--bg2);border:1px solid var(--border-hi);padding:20px;width:100%;max-width:700px;margin:auto;}
+.detail-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.detail-title{color:var(--fg-bright);font-size:12px;letter-spacing:2px;}
+.detail-field{margin-bottom:14px;}
+.detail-label{font-size:10px;color:var(--fg-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;}
+.detail-value{color:var(--fg);line-height:1.8;white-space:pre-wrap;word-break:break-word;border-left:2px solid var(--border-hi);padding:6px 12px;}
+.detail-value.bright{color:var(--fg-bright);}
+.detail-meta{display:flex;gap:16px;font-size:10px;color:var(--muted);margin-top:12px;flex-wrap:wrap;}
+
+/* responsive */
+@media(max-width:600px){
+  td.answer{display:none;}
+  .stats{gap:12px;}
+  .stat-value{font-size:14px;}
+  #search{width:160px;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">erikao<span class="sep">::</span>admin logs</div>
+  <div class="topbar-right">
+    <button class="btn" onclick="refresh()">[ atualizar ]</button>
+    <button class="btn" onclick="exportJSON()">[ exportar JSON ]</button>
+    <button class="btn" onclick="window.location='/'">[ terminal ]</button>
+  </div>
+</div>
+
+<div class="stats" id="stats">
+  <div class="stat"><div class="stat-label">total queries</div><div class="stat-value" id="s-total">—</div></div>
+  <div class="stat"><div class="stat-label">hoje</div><div class="stat-value green" id="s-today">—</div></div>
+  <div class="stat"><div class="stat-label">tempo médio</div><div class="stat-value yellow" id="s-avg">—</div></div>
+  <div class="stat"><div class="stat-label">modelo ativo</div><div class="stat-value" id="s-model">—</div></div>
+  <div class="stat"><div class="stat-label">ollama</div><div class="stat-value" id="s-ollama">—</div></div>
+</div>
+
+<div class="filterbar">
+  <span class="filter-label">filtrar:</span>
+  <input id="search" type="text" placeholder="buscar pergunta ou resposta..." oninput="applyFilters()">
+  <select id="model-filter" onchange="applyFilters()">
+    <option value="">todos os modelos</option>
+  </select>
+  <span id="count-label"></span>
+</div>
+
+<div class="table-wrap">
+  <div class="loading" id="loading">carregando logs...</div>
+  <table id="table" style="display:none">
+    <thead>
+      <tr>
+        <th onclick="sortBy('id')">#<span class="sort-icon">↕</span></th>
+        <th onclick="sortBy('ts')">timestamp<span class="sort-icon">↕</span></th>
+        <th onclick="sortBy('dur')">duração<span class="sort-icon">↕</span></th>
+        <th>modelo</th>
+        <th>pergunta</th>
+        <th>resposta</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <div class="empty" id="empty" style="display:none">
+    <div class="code">[ ]</div>
+    nenhum log encontrado.<br><br>
+    faça uma pergunta no terminal para ver os logs aqui.
+  </div>
+</div>
+
+<!-- detail modal -->
+<div id="detail-modal">
+  <div class="detail-box">
+    <div class="detail-header">
+      <div class="detail-title">// detalhe da query</div>
+      <button class="btn" onclick="closeDetail()">[ fechar ]</button>
+    </div>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<script>
+let allLogs = [];
+let sortField = 'id';
+let sortAsc = false;
+let currentDetail = null;
+
+async function loadLogs() {
+  try {
+    const r = await fetch('/api/logs');
+    if (!r.ok) throw new Error('server error');
+    allLogs = await r.json();
+    if (!Array.isArray(allLogs)) allLogs = [];
+    updateStats();
+    populateModelFilter();
+    applyFilters();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('table').style.display = 'table';
+  } catch (e) {
+    document.getElementById('loading').textContent = 'erro ao carregar: ' + e.message + '. servidor Go rodando?';
+  }
+}
+
+async function loadStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const d = await r.json();
+    document.getElementById('s-model').textContent = d.model || '—';
+    document.getElementById('s-ollama').textContent = d.ollama_ok ? 'online' : 'offline';
+    document.getElementById('s-ollama').style.color = d.ollama_ok ? 'var(--green)' : 'var(--red)';
+  } catch {}
+}
+
+function updateStats() {
+  document.getElementById('s-total').textContent = allLogs.length;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const todayCount = allLogs.filter(l => l.timestamp && l.timestamp.startsWith(today)).length;
+  document.getElementById('s-today').textContent = todayCount;
+
+  if (allLogs.length > 0) {
+    const avg = Math.round(allLogs.reduce((s, l) => s + (l.duration_ms || 0), 0) / allLogs.length);
+    document.getElementById('s-avg').textContent = avg + 'ms';
+  }
+}
+
+function populateModelFilter() {
+  const sel = document.getElementById('model-filter');
+  const models = [...new Set(allLogs.map(l => l.model).filter(Boolean))];
+  sel.innerHTML = '<option value="">todos os modelos</option>';
+  models.forEach(m => {
+    const o = document.createElement('option');
+    o.value = m; o.textContent = m;
+    sel.appendChild(o);
+  });
+}
+
+function applyFilters() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const m = document.getElementById('model-filter').value;
+
+  let filtered = allLogs.filter(l => {
+    const matchQ = !q || (l.question || '').toLowerCase().includes(q) || (l.answer || '').toLowerCase().includes(q);
+    const matchM = !m || l.model === m;
+    return matchQ && matchM;
+  });
+
+  filtered = [...filtered].sort((a, b) => {
+    let va, vb;
+    if (sortField === 'id') { va = a.id; vb = b.id; }
+    else if (sortField === 'ts') { va = a.timestamp; vb = b.timestamp; }
+    else if (sortField === 'dur') { va = a.duration_ms; vb = b.duration_ms; }
+    return sortAsc ? (va > vb ? 1 : -1) : (va < vb ? 1 : -1);
+  });
+
+  renderTable(filtered);
+  document.getElementById('count-label').textContent = `${filtered.length} de ${allLogs.length} registros`;
+}
+
+function sortBy(field) {
+  if (sortField === field) sortAsc = !sortAsc;
+  else { sortField = field; sortAsc = false; }
+
+  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+  const idx = ['id','ts','dur'].indexOf(field);
+  if (idx >= 0) {
+    const ths = document.querySelectorAll('th');
+    ths[idx].classList.add('sorted');
+    ths[idx].querySelector('.sort-icon').textContent = sortAsc ? '↑' : '↓';
+  }
+  applyFilters();
+}
+
+function renderTable(logs) {
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty');
+
+  if (logs.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = logs.map(l => {
+    const dur = l.duration_ms || 0;
+    const durClass = dur < 3000 ? 'fast' : 'slow';
+    const durText = dur >= 1000 ? (dur/1000).toFixed(1)+'s' : dur+'ms';
+    const q = esc(l.question || '');
+    const a = esc(l.answer || '');
+    const qShort = q.length > 80 ? q.slice(0,80)+'…' : q;
+    const aShort = a.length > 100 ? a.slice(0,100)+'…' : a;
+
+    return `<tr onclick="openDetail(${l.id})" style="cursor:pointer">
+      <td class="id">${l.id}</td>
+      <td class="ts">${esc(l.timestamp||'')}</td>
+      <td class="dur"><span class="${durClass}">${durText}</span></td>
+      <td class="model-col">${esc(l.model||'')}</td>
+      <td class="question">${qShort}</td>
+      <td class="answer">${aShort}</td>
+    </tr>`;
+  }).join('');
+}
+
+function openDetail(id) {
+  const l = allLogs.find(x => x.id === id);
+  if (!l) return;
+  currentDetail = l;
+  const el = document.getElementById('detail-content');
+  el.innerHTML = `
+    <div class="detail-field">
+      <div class="detail-label">pergunta</div>
+      <div class="detail-value bright">${esc(l.question||'')}</div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-label">resposta</div>
+      <div class="detail-value">${esc(l.answer||'')}</div>
+    </div>
+    <div class="detail-meta">
+      <span>id: ${l.id}</span>
+      <span>modelo: ${esc(l.model||'')}</span>
+      <span>duração: ${l.duration_ms||0}ms</span>
+      <span>timestamp: ${esc(l.timestamp||'')}</span>
+    </div>`;
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); }
+
+document.getElementById('detail-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('detail-modal')) closeDetail();
+});
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(allLogs, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `erikao-logs-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function refresh() { loadLogs(); loadStatus(); }
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+loadLogs();
+loadStatus();
+setInterval(loadStatus, 15000);
+</script>
+</body>
+</html>
