@@ -17,7 +17,7 @@
   --bg:#0c0c0c;--bg2:#111;
   --fg:#b0b0b0;--fg-dim:#404040;--fg-bright:#e8e8e8;
   --border:#1e1e1e;--border-hi:#2e2e2e;
-  --muted:#606060;--green:#4ec94e;--red:#e05050;--yellow:#c8a84b;
+  --muted:#606060;--green:#4ec94e;--red:#c84040;--yellow:#c8a84b;
   --font:'Share Tech Mono',monospace;
   --sidebar-w:240px;
 }
@@ -45,11 +45,9 @@ body{
   color:var(--fg-bright);letter-spacing:1px;font-size:12px;
   display:flex;align-items:center;gap:8px;
 }
-.status-dot{
-  width:7px;height:7px;border-radius:50%;
-  background:var(--fg-dim);display:inline-block;flex-shrink:0;
-}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--fg-dim);display:inline-block;flex-shrink:0;transition:background .4s;}
 .status-dot.online{background:var(--green);}
+.status-dot.offline{background:var(--red);}
 .topbar-right{display:flex;align-items:center;gap:8px;}
 .topbar-stat{font-size:10px;color:var(--muted);}
 .topbar-stat span{color:var(--fg-bright);}
@@ -81,6 +79,7 @@ body{
 .line.bright{color:var(--fg-bright);}
 .line.muted{color:var(--muted);}
 .line.user{color:var(--fg-bright);}
+.line.err{color:var(--red);}
 
 .ai-block{
   border-left:2px solid var(--border-hi);
@@ -88,6 +87,19 @@ body{
   color:var(--fg-bright);line-height:1.8;white-space:pre-wrap;
 }
 .cursor::after{content:'▋';animation:blink .8s step-end infinite;}
+
+/* offline screen */
+#offline{
+  position:absolute;inset:0;
+  display:none;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:16px;color:var(--fg-dim);text-align:center;
+  padding:24px;
+}
+#offline.show{display:flex;}
+#offline .big{font-size:11px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+#offline .msg{font-size:12px;color:var(--fg-dim);line-height:1.8;max-width:320px;}
+#offline .cursor-line::after{content:'▋';animation:blink .8s step-end infinite;color:var(--fg-dim);}
 
 /* sidebar desktop */
 .sidebar{
@@ -117,24 +129,15 @@ canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
   font-size:10px;color:var(--muted);letter-spacing:1px;
   display:flex;justify-content:space-between;align-items:center;
 }
-.model-pill span{color:var(--fg-bright);font-size:11px;}
-.model-pill .mpill-dot{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--fg-dim);display:inline-block;margin-right:5px;
-}
+.model-pill .mpill-dot{width:6px;height:6px;border-radius:50%;background:var(--fg-dim);display:inline-block;margin-right:5px;transition:background .4s;}
 .model-pill .mpill-dot.ok{background:var(--green);}
+.model-pill span{color:var(--fg-bright);font-size:11px;}
 
 /* mobile drawer */
-.sidebar-overlay{
-  display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.75);z-index:200;
-  opacity:0;transition:opacity .2s;
-}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;opacity:0;transition:opacity .2s;}
 .sidebar-overlay.open{display:block;opacity:1;}
-
 .sidebar-drawer{
-  position:fixed;top:0;right:0;bottom:0;
-  width:min(var(--sidebar-w),88vw);
+  position:fixed;top:0;right:0;bottom:0;width:min(var(--sidebar-w),88vw);
   background:var(--bg);border-left:1px solid var(--border);
   display:flex;flex-direction:column;align-items:center;
   padding:14px 10px;gap:14px;overflow-y:auto;
@@ -142,11 +145,7 @@ canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
   transition:transform .25s cubic-bezier(.4,0,.2,1);
 }
 .sidebar-drawer.open{transform:translateX(0);}
-.drawer-close{
-  align-self:flex-end;background:none;border:1px solid var(--border);
-  color:var(--muted);padding:4px 10px;cursor:pointer;
-  font-family:var(--font);font-size:11px;letter-spacing:1px;
-}
+.drawer-close{align-self:flex-end;background:none;border:1px solid var(--border);color:var(--muted);padding:4px 10px;cursor:pointer;font-family:var(--font);font-size:11px;letter-spacing:1px;}
 .drawer-close:hover{color:var(--fg-bright);}
 
 /* inputbar */
@@ -163,14 +162,11 @@ canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
 }
 #inp::placeholder{color:var(--fg-dim);}
 #inp:disabled{opacity:.4;}
-
 #model-select{
   background:var(--bg2);border:1px solid var(--border);
   color:var(--muted);font-family:var(--font);font-size:10px;
-  padding:4px 6px;outline:none;cursor:pointer;max-width:110px;
+  padding:4px 6px;outline:none;cursor:pointer;max-width:120px;display:none;
 }
-#model-select:focus{border-color:var(--border-hi);}
-
 #btn{
   background:transparent;border:1px solid var(--border);
   color:var(--muted);font-family:var(--font);font-size:12px;
@@ -189,16 +185,11 @@ canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
 }
 #thinking.visible{opacity:1;pointer-events:all;}
 #thinking-q{color:var(--fg-bright);font-size:13px;text-align:center;padding:0 24px;}
-#thinking-msg{
-  color:var(--muted);font-size:11px;letter-spacing:.5px;
-  transition:opacity .25s;min-height:18px;text-align:center;padding:0 24px;
-}
-#thinking-msg.show{opacity:1;}#thinking-msg.hide{opacity:0;}
+#thinking-msg{color:var(--muted);font-size:11px;transition:opacity .25s;min-height:18px;text-align:center;padding:0 24px;}
+#thinking-msg.show{opacity:1;}
+#thinking-msg.hide{opacity:0;}
 .thinking-dots{display:flex;gap:6px;align-items:center;}
-.thinking-dots span{
-  width:5px;height:5px;border-radius:50%;
-  background:var(--muted);animation:pulse 1.4s ease-in-out infinite;
-}
+.thinking-dots span{width:5px;height:5px;border-radius:50%;background:var(--muted);animation:pulse 1.4s ease-in-out infinite;}
 .thinking-dots span:nth-child(2){animation-delay:.2s;}
 .thinking-dots span:nth-child(3){animation-delay:.4s;}
 
@@ -206,10 +197,7 @@ canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
 @keyframes blink{50%{opacity:0;}}
 @keyframes pulse{0%,100%{opacity:.3;transform:scale(.8);}50%{opacity:1;transform:scale(1);}}
 .glitch{animation:glitch .3s steps(1) 3;}
-@keyframes glitch{
-  0%{filter:none;}33%{filter:invert(.04) hue-rotate(90deg);}
-  66%{filter:none;}100%{filter:invert(.02);}
-}
+@keyframes glitch{0%{filter:none;}33%{filter:invert(.04) hue-rotate(90deg);}66%{filter:none;}100%{filter:invert(.02);}}
 
 /* mobile */
 @media(max-width:768px){
@@ -217,11 +205,8 @@ canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
   .topbar-stat{display:none;}
   .topbar{padding:0 10px;}
   .log{padding:12px 12px 80px;}
-  .inputbar{
-    padding-bottom:max(10px, env(safe-area-inset-bottom));
-  }
+  .inputbar{padding-bottom:max(10px,env(safe-area-inset-bottom));}
   #inp{font-size:16px;}
-  #model-select{display:none;}
   #btn{padding:6px 12px;}
 }
 @media(min-width:769px){
@@ -244,13 +229,23 @@ canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
   </div>
 </div>
 
-<div class="body">
+<div class="body" style="position:relative;">
   <div class="log" id="log"></div>
 
-  <div class="sidebar" id="sidebar-desktop">
+  <!-- offline overlay (dentro do body, não cobre topbar/inputbar) -->
+  <div id="offline">
+    <div class="big">servidor offline</div>
+    <div class="msg">
+      o erikao está dormindo.<br>
+      tente novamente mais tarde.
+    </div>
+    <div class="cursor-line" style="font-size:11px;color:var(--fg-dim)">$ _</div>
+  </div>
+
+  <div class="sidebar">
     <div class="sid-label">neural core</div>
     <canvas id="px" width="55" height="55"></canvas>
-    <div class="model-pill" id="model-pill">
+    <div class="model-pill">
       <div><span class="mpill-dot" id="ollama-dot"></span>backend</div>
       <span id="model-name">—</span>
     </div>
@@ -270,7 +265,7 @@ canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
   </div>
 </div>
 
-<!-- mobile overlay -->
+<!-- mobile drawer -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
 <div class="sidebar-drawer" id="sidebar-drawer">
   <button class="drawer-close" onclick="closeSidebar()">[ fechar ]</button>
@@ -309,42 +304,39 @@ canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
 </div>
 
 <script>
-/* ── backend detection ───────────────────────────────── */
+/* ── backend resolution ──────────────────────────────── */
 const isLocal = ['localhost','127.0.0.1'].includes(location.hostname);
-const WORKER_URL = 'https://mute-union-71ff.erikgds.workers.dev';
+let BACKEND = '';  // base URL for API calls — empty = relative (local Go server)
+
+async function resolveBackend() {
+  if (isLocal) { BACKEND = ''; return true; }
+  try {
+    const cfg = await fetch('/config.json').then(r => r.json());
+    if (!cfg.backend) return false;
+    BACKEND = cfg.backend.replace(/\/$/, '');
+    // test reachability
+    const r = await fetch(BACKEND + '/api/status', {signal: AbortSignal.timeout(5000)});
+    return r.ok;
+  } catch { return false; }
+}
 
 async function apiChat(message, model) {
-  if (isLocal) {
-    const r = await fetch('/api/chat', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message, model})
-    });
-    return r.json();
-  }
-  const r = await fetch(WORKER_URL, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({message})
+  const r = await fetch(BACKEND + '/api/chat', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({message, model})
   });
-  const d = await r.json();
-  return {result: d.result || d.response || 'sem resposta.', model:'worker', duration_ms:0};
+  return r.json();
 }
 
 async function apiStatus() {
-  if (!isLocal) return {ollama_ok:true, model:'worker', total_queries:0};
-  try {
-    const r = await fetch('/api/status');
-    return r.json();
-  } catch { return {ollama_ok:false, model:'—', total_queries:0}; }
+  const r = await fetch(BACKEND + '/api/status', {signal: AbortSignal.timeout(4000)});
+  return r.json();
 }
 
 async function apiModels() {
-  if (!isLocal) return {models:[]};
-  try {
-    const r = await fetch('/api/models');
-    return r.json();
-  } catch { return {models:[]}; }
+  const r = await fetch(BACKEND + '/api/models', {signal: AbortSignal.timeout(4000)});
+  return r.json();
 }
 
 /* ── state ───────────────────────────────────────────── */
@@ -354,17 +346,17 @@ let startTime = Date.now();
 let busy = false;
 let pxActive = false;
 let fw = false;
+let serverOnline = false;
 
 /* ── uptime ──────────────────────────────────────────── */
 setInterval(() => {
-  const s = Math.floor((Date.now()-startTime)/1000);
-  const pad = n => String(n).padStart(2,'0');
-  document.getElementById('uptime').textContent =
-    `${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`;
+  const s = Math.floor((Date.now() - startTime) / 1000);
+  const p = n => String(n).padStart(2,'0');
+  document.getElementById('uptime').textContent = `${p(Math.floor(s/3600))}:${p(Math.floor(s%3600/60))}:${p(s%60)}`;
 }, 1000);
 
 /* ── log helpers ─────────────────────────────────────── */
-function addLine(text, cls='normal', delay=0) {
+function addLine(text, cls = 'normal', delay = 0) {
   return new Promise(res => setTimeout(() => {
     const log = document.getElementById('log');
     const el = document.createElement('div');
@@ -384,45 +376,66 @@ async function typeBlock(text) {
   log.appendChild(el);
   for (let i = 0; i < text.length; i += 4) {
     await new Promise(r => setTimeout(r, 10));
-    el.textContent += text.slice(i, i+4);
+    el.textContent += text.slice(i, i + 4);
     log.scrollTop = log.scrollHeight;
   }
   el.classList.remove('cursor');
 }
 
-/* ── status / models ─────────────────────────────────── */
-async function checkStatus() {
-  const d = await apiStatus();
+/* ── online / offline UI ─────────────────────────────── */
+function setOnlineUI(online) {
+  serverOnline = online;
   const dot = document.getElementById('status-dot');
-  const d1 = document.getElementById('ollama-dot');
-  const d2 = document.getElementById('ollama-dot2');
-  const n1 = document.getElementById('model-name');
-  const n2 = document.getElementById('model-name2');
-
-  dot.classList.toggle('online', d.ollama_ok);
-  [d1,d2].forEach(e => { if(e) e.classList.toggle('ok', d.ollama_ok); });
-  [n1,n2].forEach(e => { if(e) e.textContent = d.model || '—'; });
-  if (d.model) currentModel = d.model;
-
+  dot.classList.toggle('online', online);
+  dot.classList.toggle('offline', !online);
+  document.getElementById('offline').classList.toggle('show', !online);
+  document.getElementById('inp').disabled = !online;
+  document.getElementById('btn').disabled = !online;
   if (isLocal) {
     document.getElementById('query-stat').style.display = '';
     document.getElementById('admin-btn').style.display = '';
   }
 }
 
+async function updateStatus() {
+  try {
+    const d = await apiStatus();
+    setOnlineUI(true);
+    const n1 = document.getElementById('model-name');
+    const n2 = document.getElementById('model-name2');
+    const d1 = document.getElementById('ollama-dot');
+    const d2 = document.getElementById('ollama-dot2');
+    if (n1) n1.textContent = d.model || '—';
+    if (n2) n2.textContent = d.model || '—';
+    if (d1) d1.classList.toggle('ok', d.ollama_ok);
+    if (d2) d2.classList.toggle('ok', d.ollama_ok);
+    if (d.model) currentModel = d.model;
+    const qc = document.getElementById('query-count');
+    if (qc && d.total_queries) qc.textContent = d.total_queries;
+  } catch {
+    setOnlineUI(false);
+  }
+}
+
 async function loadModels() {
-  if (!isLocal) return;
-  const d = await apiModels();
-  const sel = document.getElementById('model-select');
-  sel.innerHTML = '';
-  (d.models||[]).forEach(m => {
-    const o = document.createElement('option');
-    o.value = m.name; o.textContent = m.name;
-    if (m.name === currentModel) o.selected = true;
-    sel.appendChild(o);
-  });
-  sel.onchange = () => { currentModel = sel.value; addLine(`// modelo: ${currentModel}`, 'muted'); };
-  if (d.models && d.models.length) sel.style.display = '';
+  try {
+    const d = await apiModels();
+    const sel = document.getElementById('model-select');
+    sel.innerHTML = '';
+    (d.models || []).forEach(m => {
+      const o = document.createElement('option');
+      o.value = m.name; o.textContent = m.name;
+      if (m.name === currentModel) o.selected = true;
+      sel.appendChild(o);
+    });
+    if (d.models && d.models.length) {
+      sel.style.display = '';
+      sel.onchange = () => {
+        currentModel = sel.value;
+        addLine(`// modelo: ${currentModel}`, 'muted');
+      };
+    }
+  } catch {}
 }
 
 /* ── sidebar ─────────────────────────────────────────── */
@@ -436,7 +449,7 @@ function closeSidebar() {
 }
 document.getElementById('sidebar-btn').onclick = openSidebar;
 
-/* ── thinking ────────────────────────────────────────── */
+/* ── thinking overlay ────────────────────────────────── */
 const STEPS = [
   'tokenizando com bertgpt-ultra-max-pro...',
   'consultando 2.1 trilhões de tokens (todos memes)...',
@@ -445,6 +458,7 @@ const STEPS = [
   'verificando se o llama está acordado...',
   'confiança: 100% (não verifiquei nada)',
   'buffering inteligência artificial...',
+  'o erikao está assistindo você digitar...',
 ];
 
 function showThinking(q) {
@@ -454,12 +468,11 @@ function showThinking(q) {
   let i = 0;
   const cycle = () => {
     el.classList.replace('show','hide');
-    setTimeout(() => { el.textContent = STEPS[i++%STEPS.length]; el.classList.replace('hide','show'); }, 280);
+    setTimeout(() => { el.textContent = STEPS[i++ % STEPS.length]; el.classList.replace('hide','show'); }, 280);
   };
   cycle();
   return setInterval(cycle, 1900);
 }
-
 function hideThinking(id) {
   clearInterval(id);
   document.getElementById('thinking').classList.remove('visible');
@@ -467,7 +480,7 @@ function hideThinking(id) {
 
 /* ── run ─────────────────────────────────────────────── */
 async function run() {
-  if (busy) return;
+  if (busy || !serverOnline) return;
   const v = document.getElementById('inp').value.trim();
   if (!v) return;
 
@@ -490,19 +503,15 @@ async function run() {
     const d = await apiChat(v, currentModel);
     result = d.result || 'sem resposta.';
     duration = d.duration_ms || 0;
-  } catch(e) {
-    if (!isLocal) {
-      result = 'erro ao conectar com o backend.\n\nse você está no site público, o servidor pode estar fora do ar.\npara usar localmente com ollama: github.com/erikgds2/erikaoia';
-    } else {
-      result = 'erro ao conectar. certifique-se que o servidor Go está rodando:\n  go run main.go';
-    }
+    if (d.error) result = d.result;
+  } catch {
+    result = 'erro de conexão. o servidor pode ter ficado offline.';
+    setOnlineUI(false);
   }
 
   hideThinking(tid);
-
   await addLine(`$ ${v}`, 'user');
   await typeBlock(result);
-
   const info = duration > 0 ? `// ${duration}ms | ${currentModel}` : '// resposta recebida';
   await addLine(info, 'muted', 200);
   await addLine('', 'dim');
@@ -521,19 +530,39 @@ document.getElementById('inp').addEventListener('keydown', e => { if(e.key==='En
 
 /* ── boot ────────────────────────────────────────────── */
 async function boot() {
-  if (isLocal) {
-    await addLine('erikao-ai :: modo local (ollama)', 'dim', 0);
-    await checkStatus();
-    await loadModels();
-    await addLine('─'.repeat(48), 'dim', 400);
-  } else {
-    await addLine('erikao-ai :: terminal público', 'dim', 0);
-    await checkStatus();
-    await addLine('─'.repeat(48), 'dim', 400);
+  // start with input disabled until we know server state
+  document.getElementById('inp').disabled = true;
+  document.getElementById('btn').disabled = true;
+
+  const online = await resolveBackend();
+  setOnlineUI(online);
+
+  if (online) {
+    await updateStatus();
+    if (isLocal) await loadModels();
+    await addLine('─'.repeat(48), 'dim', 0);
+    await addLine('ia criada pelo erikao. pode perguntar qualquer coisa.', 'bright', 200);
+    await addLine('─'.repeat(48), 'dim', 500);
   }
-  await addLine('ia criada pelo erikao. pode perguntar qualquer coisa.', 'bright', 600);
-  await addLine('─'.repeat(48), 'dim', 900);
+  // if offline, the #offline overlay is shown by setOnlineUI
 }
+
+/* ── periodic status check ───────────────────────────── */
+setInterval(async () => {
+  if (!isLocal && !BACKEND) return;
+  const wasOnline = serverOnline;
+  try {
+    await apiStatus();
+    if (!wasOnline) {
+      setOnlineUI(true);
+      await addLine('─'.repeat(48), 'dim');
+      await addLine('servidor reconectado.', 'bright');
+      await addLine('─'.repeat(48), 'dim');
+    }
+  } catch {
+    if (wasOnline) setOnlineUI(false);
+  }
+}, 20000);
 
 /* ── pixel art ───────────────────────────────────────── */
 function setupPx(id) {
@@ -541,14 +570,14 @@ function setupPx(id) {
   const ctx = c.getContext('2d'), W=55, H=55;
   const G = ['#0c0c0c','#1a1a1a','#2e2e2e','#444','#666','#888','#aaa','#ccc'];
   let s = Array.from({length:H}, ()=>Array.from({length:W}, ()=>Math.random()>.88?G[~~(Math.random()*4)+1]:'#0c0c0c'));
-  function draw() {
+  const draw = () => {
     const img=ctx.createImageData(W,H);
     for(let y=0;y<H;y++) for(let x=0;x<W;x++){
       const v=parseInt(s[y][x].slice(1,3)||'0c',16),i=(y*W+x)*4;
       img.data[i]=v;img.data[i+1]=v;img.data[i+2]=v;img.data[i+3]=255;
     }
     ctx.putImageData(img,0,0);
-  }
+  };
   setInterval(()=>{
     const n=s.map(r=>[...r]);
     for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){
@@ -622,7 +651,6 @@ function animBars() {
 }
 
 boot();
-setInterval(checkStatus, 30000);
 </script>
 </body>
 </html>

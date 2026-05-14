@@ -91,6 +91,9 @@ func main() {
 	mux.HandleFunc("/api/logs", cors(logsHandler))
 	mux.HandleFunc("/api/models", cors(modelsHandler))
 	mux.HandleFunc("/api/status", cors(statusHandler(model)))
+	mux.HandleFunc("/config.json", cors(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "config.json")
+	}))
 	mux.Handle("/", http.FileServer(http.Dir("frontend")))
 
 	log.Printf("erikao-ai iniciado em http://localhost:%s", port)
