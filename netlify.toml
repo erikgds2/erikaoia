@@ -1,14 +1,8 @@
 [build]
   publish = "."
-  command = ""
-  ignore = "exit 0"
-
-[build.environment]
-  NODE_VERSION = "22"
+  command = "echo pronto"
 
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Cache-Control = "no-cache"
+    Cache-Control = "no-cache, no-store, must-revalidate"
