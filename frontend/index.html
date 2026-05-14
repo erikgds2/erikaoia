@@ -331,7 +331,7 @@ async function resolveBackend() {
     var cfg = await cfgResp.json();
     if (!cfg.backend) return false;
     BACKEND = cfg.backend.replace(/\/$/, '');
-    var r = await fetchTimeout(BACKEND + '/api/status', {}, 8000);
+    var r = await fetchTimeout(BACKEND + '/api/status', {headers: {'ngrok-skip-browser-warning': '1'}}, 8000);
     return r.ok;
   } catch(e) {
     return false;
@@ -341,19 +341,19 @@ async function resolveBackend() {
 async function apiChat(message, model) {
   const r = await fetch(BACKEND + '/api/chat', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: {'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1'},
     body: JSON.stringify({message, model})
   });
   return r.json();
 }
 
 async function apiStatus() {
-  var r = await fetchTimeout(BACKEND + '/api/status', {}, 6000);
+  var r = await fetchTimeout(BACKEND + '/api/status', {headers: {'ngrok-skip-browser-warning': '1'}}, 6000);
   return r.json();
 }
 
 async function apiModels() {
-  var r = await fetchTimeout(BACKEND + '/api/models', {}, 6000);
+  var r = await fetchTimeout(BACKEND + '/api/models', {headers: {'ngrok-skip-browser-warning': '1'}}, 6000);
   return r.json();
 }
 
