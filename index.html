@@ -2,518 +2,470 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0c0c0c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>erikao :: ai terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 
-* { margin:0; padding:0; box-sizing:border-box; }
-
-:root {
-  --bg: #0c0c0c;
-  --fg: #b0b0b0;
-  --fg-dim: #404040;
-  --fg-bright: #e8e8e8;
-  --border: #222;
-  --accent: #ffffff;
-  --muted: #606060;
+:root{
+  --bg:#0c0c0c;--bg2:#111;
+  --fg:#b0b0b0;--fg-dim:#404040;--fg-bright:#e8e8e8;
+  --border:#1e1e1e;--border-hi:#2e2e2e;
+  --muted:#606060;--green:#4ec94e;--red:#e05050;--yellow:#c8a84b;
+  --font:'Share Tech Mono',monospace;
+  --sidebar-w:240px;
 }
 
-body {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 13px;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
+  pointer-events:none;z-index:999;
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px);
-  pointer-events: none;
-  z-index: 100;
+body{
+  background:var(--bg);color:var(--fg);
+  font-family:var(--font);font-size:13px;
+  height:100dvh;overflow:hidden;
+  display:flex;flex-direction:column;
 }
 
-.topbar {
-  border-bottom: 1px solid var(--border);
-  padding: 6px 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-shrink: 0;
-  font-size: 12px;
-  color: var(--muted);
+/* topbar */
+.topbar{
+  border-bottom:1px solid var(--border);padding:0 14px;height:38px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;background:var(--bg);z-index:10;
+}
+.topbar-brand{
+  color:var(--fg-bright);letter-spacing:1px;font-size:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.status-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--fg-dim);display:inline-block;flex-shrink:0;
+}
+.status-dot.online{background:var(--green);}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.topbar-stat{font-size:10px;color:var(--muted);}
+.topbar-stat span{color:var(--fg-bright);}
+
+.icon-btn{
+  background:none;border:1px solid var(--border);
+  color:var(--muted);width:28px;height:28px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-family:var(--font);font-size:13px;
+  border-radius:2px;transition:all .15s;flex-shrink:0;
+}
+.icon-btn:hover{border-color:var(--border-hi);color:var(--fg-bright);}
+
+/* layout */
+.body{flex:1;display:flex;overflow:hidden;}
+
+.log{
+  flex:1;padding:14px 16px;overflow-y:auto;
+  line-height:1.75;scrollbar-width:thin;
+  scrollbar-color:var(--border) transparent;min-width:0;
+}
+.log::-webkit-scrollbar{width:3px;}
+.log::-webkit-scrollbar-thumb{background:var(--border-hi);}
+
+/* lines */
+.line{margin-bottom:2px;word-break:break-word;}
+.line.dim{color:var(--fg-dim);}
+.line.normal{color:var(--fg);}
+.line.bright{color:var(--fg-bright);}
+.line.muted{color:var(--muted);}
+.line.user{color:var(--fg-bright);}
+
+.ai-block{
+  border-left:2px solid var(--border-hi);
+  padding:6px 12px;margin:8px 0 10px;
+  color:var(--fg-bright);line-height:1.8;white-space:pre-wrap;
+}
+.cursor::after{content:'▋';animation:blink .8s step-end infinite;}
+
+/* sidebar desktop */
+.sidebar{
+  width:var(--sidebar-w);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;
+  padding:14px 10px;gap:14px;flex-shrink:0;overflow-y:auto;
+  scrollbar-width:none;background:var(--bg);
+}
+.sidebar::-webkit-scrollbar{display:none;}
+.sid-label{font-size:10px;color:var(--fg-dim);letter-spacing:2px;text-transform:uppercase;align-self:flex-start;}
+
+canvas#px{image-rendering:pixelated;width:220px;height:220px;border:1px solid var(--border);}
+.counter{font-size:30px;letter-spacing:6px;color:var(--fg-bright);font-variant-numeric:tabular-nums;}
+canvas#rain{display:block;border:1px solid var(--border);}
+
+.bars{width:100%;display:flex;flex-direction:column;gap:6px;}
+.bar-row{display:flex;align-items:center;gap:8px;font-size:10px;}
+.bar-key{width:58px;color:var(--muted);}
+.bar-track{flex:1;height:5px;background:#1a1a1a;border:1px solid var(--border);overflow:hidden;}
+.bar-fill{height:100%;background:var(--fg);transition:width .5s ease;}
+
+canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
+.farmer-label{font-size:10px;color:var(--fg-dim);}
+
+.model-pill{
+  width:100%;border:1px solid var(--border);padding:6px 10px;
+  font-size:10px;color:var(--muted);letter-spacing:1px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.model-pill span{color:var(--fg-bright);font-size:11px;}
+.model-pill .mpill-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--fg-dim);display:inline-block;margin-right:5px;
+}
+.model-pill .mpill-dot.ok{background:var(--green);}
+
+/* mobile drawer */
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.75);z-index:200;
+  opacity:0;transition:opacity .2s;
+}
+.sidebar-overlay.open{display:block;opacity:1;}
+
+.sidebar-drawer{
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(var(--sidebar-w),88vw);
+  background:var(--bg);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;
+  padding:14px 10px;gap:14px;overflow-y:auto;
+  z-index:201;transform:translateX(100%);
+  transition:transform .25s cubic-bezier(.4,0,.2,1);
+}
+.sidebar-drawer.open{transform:translateX(0);}
+.drawer-close{
+  align-self:flex-end;background:none;border:1px solid var(--border);
+  color:var(--muted);padding:4px 10px;cursor:pointer;
+  font-family:var(--font);font-size:11px;letter-spacing:1px;
+}
+.drawer-close:hover{color:var(--fg-bright);}
+
+/* inputbar */
+.inputbar{
+  border-top:1px solid var(--border);padding:10px 14px;
+  display:flex;align-items:center;gap:8px;
+  flex-shrink:0;background:var(--bg);
+}
+.prompt-char{color:var(--muted);font-size:15px;flex-shrink:0;}
+#inp{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--fg-bright);font-family:var(--font);font-size:14px;
+  caret-color:var(--fg);min-width:0;
+}
+#inp::placeholder{color:var(--fg-dim);}
+#inp:disabled{opacity:.4;}
+
+#model-select{
+  background:var(--bg2);border:1px solid var(--border);
+  color:var(--muted);font-family:var(--font);font-size:10px;
+  padding:4px 6px;outline:none;cursor:pointer;max-width:110px;
+}
+#model-select:focus{border-color:var(--border-hi);}
+
+#btn{
+  background:transparent;border:1px solid var(--border);
+  color:var(--muted);font-family:var(--font);font-size:12px;
+  padding:6px 14px;cursor:pointer;letter-spacing:1px;
+  transition:all .15s;flex-shrink:0;white-space:nowrap;min-height:34px;
+}
+#btn:hover{border-color:var(--border-hi);color:var(--fg-bright);}
+#btn:disabled{opacity:.25;cursor:not-allowed;}
+
+/* thinking */
+#thinking{
+  position:fixed;inset:0;background:rgba(12,12,12,.93);
+  z-index:500;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:20px;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+#thinking.visible{opacity:1;pointer-events:all;}
+#thinking-q{color:var(--fg-bright);font-size:13px;text-align:center;padding:0 24px;}
+#thinking-msg{
+  color:var(--muted);font-size:11px;letter-spacing:.5px;
+  transition:opacity .25s;min-height:18px;text-align:center;padding:0 24px;
+}
+#thinking-msg.show{opacity:1;}#thinking-msg.hide{opacity:0;}
+.thinking-dots{display:flex;gap:6px;align-items:center;}
+.thinking-dots span{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--muted);animation:pulse 1.4s ease-in-out infinite;
+}
+.thinking-dots span:nth-child(2){animation-delay:.2s;}
+.thinking-dots span:nth-child(3){animation-delay:.4s;}
+
+/* animations */
+@keyframes blink{50%{opacity:0;}}
+@keyframes pulse{0%,100%{opacity:.3;transform:scale(.8);}50%{opacity:1;transform:scale(1);}}
+.glitch{animation:glitch .3s steps(1) 3;}
+@keyframes glitch{
+  0%{filter:none;}33%{filter:invert(.04) hue-rotate(90deg);}
+  66%{filter:none;}100%{filter:invert(.02);}
 }
 
-.topbar-left { color: var(--fg-bright); letter-spacing: 1px; }
-.topbar-right { display: flex; gap: 20px; }
-.blink { animation: blink 1.2s step-end infinite; }
-@keyframes blink { 50% { opacity:0; } }
-
-.body {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-}
-
-.log {
-  flex: 1;
-  padding: 12px 16px;
-  overflow-y: auto;
-  line-height: 1.7;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-.log::-webkit-scrollbar { width: 3px; }
-.log::-webkit-scrollbar-thumb { background: var(--border); }
-
-.sidebar {
-  width: 240px;
-  border-left: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 14px 10px;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-.sid-label {
-  font-size: 10px;
-  color: var(--fg-dim);
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  align-self: flex-start;
-}
-
-canvas#px { image-rendering: pixelated; width: 220px; height: 220px; border: 1px solid var(--border); }
-
-.counter {
-  font-size: 30px;
-  letter-spacing: 6px;
-  color: var(--fg-bright);
-  font-variant-numeric: tabular-nums;
-}
-
-canvas#rain { display: block; border: 1px solid var(--border); }
-
-.bars { width: 100%; display: flex; flex-direction: column; gap: 5px; }
-.bar-row { display: flex; align-items: center; gap: 8px; font-size: 10px; }
-.bar-key { width: 58px; color: var(--muted); }
-.bar-track { flex: 1; height: 5px; background: #1a1a1a; border: 1px solid var(--border); overflow: hidden; }
-.bar-fill { height: 100%; background: var(--fg); transition: width 0.4s ease; }
-
-canvas#farmer { image-rendering: pixelated; width: 72px; height: 72px; }
-.farmer-label { font-size: 10px; color: var(--fg-dim); }
-
-.line { margin-bottom: 1px; }
-.line.dim { color: var(--fg-dim); }
-.line.normal { color: var(--fg); }
-.line.bright { color: var(--fg-bright); }
-.line.muted { color: var(--muted); }
-.line .ts { color: var(--fg-dim); margin-right: 8px; }
-
-.ai-block {
-  border-left: 2px solid var(--muted);
-  padding: 5px 10px;
-  margin: 6px 0;
-  color: var(--fg-bright);
-  line-height: 1.8;
-}
-
-.cursor::after { content: '▋'; animation: blink 0.8s step-end infinite; }
-
-.inputbar {
-  border-top: 1px solid var(--border);
-  padding: 9px 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-@media (max-width: 768px) {
-  .inputbar {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 32px);
-    max-width: 480px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: #111;
-    padding: 10px 14px;
-    z-index: 50;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.8);
+/* mobile */
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .topbar-stat{display:none;}
+  .topbar{padding:0 10px;}
+  .log{padding:12px 12px 80px;}
+  .inputbar{
+    padding-bottom:max(10px, env(safe-area-inset-bottom));
   }
-
-  .log {
-    padding-bottom: 80px;
-  }
+  #inp{font-size:16px;}
+  #model-select{display:none;}
+  #btn{padding:6px 12px;}
 }
-
-.prompt { color: var(--muted); font-size: 15px; }
-
-#inp {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--fg-bright);
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 13px;
-  caret-color: var(--fg);
-}
-
-#inp::placeholder { color: var(--fg-dim); }
-
-#btn {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--muted);
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 12px;
-  padding: 4px 12px;
-  cursor: pointer;
-  letter-spacing: 1px;
-  transition: all 0.15s;
-}
-
-#btn:hover { border-color: var(--fg); color: var(--fg-bright); }
-#btn:disabled { opacity: 0.25; cursor: not-allowed; }
-
-.glitch { animation: glitch 0.25s steps(1) 4; }
-
-@media (max-width: 768px) {
-  body {
-    font-size: 12px;
-    height: 100dvh;
-    height: 100vh;
-  }
-
-  .topbar { padding: 5px 10px; font-size: 10px; flex-shrink: 0; }
-  .topbar-left { font-size: 10px; }
-
-  .body {
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-  }
-
-  .sidebar {
-    width: 100%;
-    border-left: none;
-    border-bottom: 1px solid var(--border);
-    flex-direction: row;
-    padding: 6px 10px;
-    gap: 10px;
-    align-items: center;
-    flex-shrink: 0;
-    height: 36px;
-    overflow: hidden;
-  }
-
-  .sid-label { display: none; }
-  canvas#px { display: none; }
-  canvas#rain { display: none; }
-  canvas#farmer { display: none; }
-  .farmer-label { display: none; }
-
-  .bars {
-    flex-direction: row;
-    gap: 8px;
-    flex: 1;
-    align-items: center;
-  }
-
-  .bar-row { flex-direction: row; align-items: center; gap: 4px; }
-  .bar-key { width: auto; font-size: 9px; color: var(--fg-dim); }
-  .bar-track { width: 36px; height: 3px; }
-
-  .counter {
-    font-size: 14px;
-    letter-spacing: 2px;
-    margin: 0;
-    flex-shrink: 0;
-  }
-
-  .log {
-    flex: 1;
-    min-height: 0;
-    padding: 10px 12px;
-    font-size: 12px;
-    line-height: 1.65;
-    overflow-y: auto;
-  }
-
-  .inputbar {
-    padding: 10px 12px;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-
-  #inp { font-size: 14px; }
-  #btn { font-size: 11px; padding: 8px 12px; }
-}
-
-@keyframes glitch {
-  0%   { transform: translate(0,0); }
-  25%  { transform: translate(-2px, 1px); filter: brightness(1.4); }
-  50%  { transform: translate(2px,-1px); filter: brightness(0.8); }
-  75%  { transform: translate(-1px,2px); }
-  100% { transform: translate(0,0); filter: none; }
+@media(min-width:769px){
+  .icon-btn.mobile-only{display:none;}
 }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <span class="topbar-left">erikao@ai-terminal:~$</span>
+  <div class="topbar-brand">
+    <div class="status-dot" id="status-dot"></div>
+    erikao :: ai terminal
+  </div>
   <div class="topbar-right">
-    <span>uptime <span id="uptime">00:00:00</span></span>
-    <span class="blink">■ online</span>
+    <span class="topbar-stat">uptime <span id="uptime">00:00:00</span></span>
+    <span class="topbar-stat" id="query-stat" style="display:none">queries <span id="query-count">0</span></span>
+    <button class="icon-btn" id="admin-btn" title="admin" style="display:none" onclick="window.open('/admin.html','_blank')">⌘</button>
+    <button class="icon-btn mobile-only" id="sidebar-btn" title="neural core">◈</button>
   </div>
 </div>
 
 <div class="body">
   <div class="log" id="log"></div>
 
-  <div class="sidebar">
-    <span class="sid-label">neural core</span>
+  <div class="sidebar" id="sidebar-desktop">
+    <div class="sid-label">neural core</div>
     <canvas id="px" width="55" height="55"></canvas>
-
-    <div class="counter" id="counter">000000</div>
-
-    <canvas id="rain" width="220" height="70"></canvas>
-
-    <div class="bars">
-      <div class="bar-row"><span class="bar-key">intelig.</span><div class="bar-track"><div class="bar-fill" id="b1" style="width:3%"></div></div></div>
-      <div class="bar-row"><span class="bar-key">utilid.</span><div class="bar-track"><div class="bar-fill" id="b2" style="width:1%"></div></div></div>
-      <div class="bar-row"><span class="bar-key">cafeina</span><div class="bar-track"><div class="bar-fill" id="b3" style="width:94%"></div></div></div>
-      <div class="bar-row"><span class="bar-key">budget</span><div class="bar-track"><div class="bar-fill" id="b4" style="width:6%"></div></div></div>
+    <div class="model-pill" id="model-pill">
+      <div><span class="mpill-dot" id="ollama-dot"></span>backend</div>
+      <span id="model-name">—</span>
     </div>
-
+    <div class="counter" id="counter">000000</div>
+    <div class="sid-label">matrix</div>
+    <canvas id="rain" width="220" height="70"></canvas>
+    <div class="sid-label">métricas</div>
+    <div class="bars">
+      <div class="bar-row"><span class="bar-key">intelig.</span><div class="bar-track"><div class="bar-fill" id="b1" style="width:5%"></div></div></div>
+      <div class="bar-row"><span class="bar-key">utilid.</span><div class="bar-track"><div class="bar-fill" id="b2" style="width:2%"></div></div></div>
+      <div class="bar-row"><span class="bar-key">cafeína</span><div class="bar-track"><div class="bar-fill" id="b3" style="width:92%"></div></div></div>
+      <div class="bar-row"><span class="bar-key">budget</span><div class="bar-track"><div class="bar-fill" id="b4" style="width:3%"></div></div></div>
+    </div>
+    <div class="sid-label">agente em campo</div>
     <canvas id="farmer" width="48" height="48"></canvas>
-    <span class="farmer-label">agente em campo</span>
+    <span class="farmer-label">erikao.exe</span>
   </div>
 </div>
 
-<div class="thinking-overlay" id="thinking">
-  <div class="thinking-question" id="thinking-q"></div>
-  <div class="thinking-msg" id="thinking-msg"></div>
-  <div class="thinking-spinner">
-    <span></span><span></span><span></span>
+<!-- mobile overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+<div class="sidebar-drawer" id="sidebar-drawer">
+  <button class="drawer-close" onclick="closeSidebar()">[ fechar ]</button>
+  <div class="sid-label">neural core</div>
+  <canvas id="px2" width="55" height="55"></canvas>
+  <div class="model-pill">
+    <div><span class="mpill-dot" id="ollama-dot2"></span>backend</div>
+    <span id="model-name2">—</span>
   </div>
+  <div class="counter" id="counter2">000000</div>
+  <div class="sid-label">matrix</div>
+  <canvas id="rain2" width="220" height="70"></canvas>
+  <div class="sid-label">métricas</div>
+  <div class="bars">
+    <div class="bar-row"><span class="bar-key">intelig.</span><div class="bar-track"><div class="bar-fill" id="b1m" style="width:5%"></div></div></div>
+    <div class="bar-row"><span class="bar-key">utilid.</span><div class="bar-track"><div class="bar-fill" id="b2m" style="width:2%"></div></div></div>
+    <div class="bar-row"><span class="bar-key">cafeína</span><div class="bar-track"><div class="bar-fill" id="b3m" style="width:92%"></div></div></div>
+    <div class="bar-row"><span class="bar-key">budget</span><div class="bar-track"><div class="bar-fill" id="b4m" style="width:3%"></div></div></div>
+  </div>
+  <div class="sid-label">agente em campo</div>
+  <canvas id="farmer2" width="48" height="48"></canvas>
+  <span class="farmer-label">erikao.exe</span>
 </div>
 
 <div class="inputbar">
-  <span class="prompt">$</span>
-  <input id="inp" type="text" placeholder="digite qualquer coisa..." maxlength="200" />
+  <span class="prompt-char">$</span>
+  <input id="inp" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="mensagem...">
+  <select id="model-select"></select>
   <button id="btn" onclick="run()">executar</button>
 </div>
 
+<div id="thinking">
+  <div class="thinking-dots"><span></span><span></span><span></span></div>
+  <div id="thinking-q"></div>
+  <div id="thinking-msg" class="show"></div>
+</div>
+
 <script>
+/* ── backend detection ───────────────────────────────── */
+const isLocal = ['localhost','127.0.0.1'].includes(location.hostname);
 const WORKER_URL = 'https://mute-union-71ff.erikgds.workers.dev';
 
-const logEl = document.getElementById('log');
+async function apiChat(message, model) {
+  if (isLocal) {
+    const r = await fetch('/api/chat', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message, model})
+    });
+    return r.json();
+  }
+  const r = await fetch(WORKER_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message})
+  });
+  const d = await r.json();
+  return {result: d.result || d.response || 'sem resposta.', model:'worker', duration_ms:0};
+}
 
-let t0 = Date.now();
+async function apiStatus() {
+  if (!isLocal) return {ollama_ok:true, model:'worker', total_queries:0};
+  try {
+    const r = await fetch('/api/status');
+    return r.json();
+  } catch { return {ollama_ok:false, model:'—', total_queries:0}; }
+}
+
+async function apiModels() {
+  if (!isLocal) return {models:[]};
+  try {
+    const r = await fetch('/api/models');
+    return r.json();
+  } catch { return {models:[]}; }
+}
+
+/* ── state ───────────────────────────────────────────── */
+let currentModel = 'llama3.2:latest';
+let queryCount = 0;
+let startTime = Date.now();
+let busy = false;
+let pxActive = false;
+let fw = false;
+
+/* ── uptime ──────────────────────────────────────────── */
 setInterval(() => {
-  const s = Math.floor((Date.now()-t0)/1000);
+  const s = Math.floor((Date.now()-startTime)/1000);
+  const pad = n => String(n).padStart(2,'0');
   document.getElementById('uptime').textContent =
-    [Math.floor(s/3600), Math.floor(s%3600/60), s%60].map(n=>String(n).padStart(2,'0')).join(':');
+    `${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`;
 }, 1000);
 
-function ts() { return new Date().toISOString().split('T')[1].slice(0,8); }
-
+/* ── log helpers ─────────────────────────────────────── */
 function addLine(text, cls='normal', delay=0) {
-  return new Promise(r => setTimeout(() => {
-    const d = document.createElement('div');
-    d.className = `line ${cls}`;
-    d.innerHTML = `<span class="ts">${ts()}</span>${text}`;
-    logEl.appendChild(d);
-    logEl.scrollTop = logEl.scrollHeight;
-    r();
+  return new Promise(res => setTimeout(() => {
+    const log = document.getElementById('log');
+    const el = document.createElement('div');
+    el.className = 'line ' + cls;
+    el.textContent = text;
+    log.appendChild(el);
+    log.scrollTop = log.scrollHeight;
+    res();
   }, delay));
 }
 
-function typeBlock(text) {
-  return new Promise(r => {
-    const wrap = document.createElement('div');
-    wrap.className = 'ai-block cursor';
-    logEl.appendChild(wrap);
-    logEl.scrollTop = logEl.scrollHeight;
-    let i = 0;
-    const words = text.split(' ');
-    const iv = setInterval(() => {
-      if (i >= words.length) { clearInterval(iv); wrap.classList.remove('cursor'); r(); return; }
-      wrap.textContent += (i > 0 ? ' ' : '') + words[i++];
-      logEl.scrollTop = logEl.scrollHeight;
-    }, 38);
-  });
-}
-
-const pxc = document.getElementById('px');
-const pxctx = pxc.getContext('2d');
-const PW = 55, PH = 55;
-const GRAYS = ['#0c0c0c','#1a1a1a','#2e2e2e','#444','#666','#888','#aaa','#ccc','#eee'];
-let pxState = Array.from({length:PH}, () => Array.from({length:PW}, () => Math.random()>0.88 ? GRAYS[Math.floor(Math.random()*4)+1] : '#0c0c0c'));
-let pxActive = false;
-
-function drawPx() {
-  const img = pxctx.createImageData(PW, PH);
-  for (let y=0; y<PH; y++) for (let x=0; x<PW; x++) {
-    const h = pxState[y][x];
-    const rv = parseInt(h.slice(1,3)||'0c',16);
-    const i = (y*PW+x)*4;
-    img.data[i]=rv; img.data[i+1]=rv; img.data[i+2]=rv; img.data[i+3]=255;
+async function typeBlock(text) {
+  const log = document.getElementById('log');
+  const el = document.createElement('div');
+  el.className = 'ai-block cursor';
+  el.textContent = '';
+  log.appendChild(el);
+  for (let i = 0; i < text.length; i += 4) {
+    await new Promise(r => setTimeout(r, 10));
+    el.textContent += text.slice(i, i+4);
+    log.scrollTop = log.scrollHeight;
   }
-  pxctx.putImageData(img, 0, 0);
+  el.classList.remove('cursor');
 }
 
-function stepPx(intensity) {
-  const next = pxState.map(r=>[...r]);
-  for (let y=1; y<PH-1; y++) for (let x=1; x<PW-1; x++) {
-    if (Math.random() < intensity) next[y][x] = GRAYS[Math.floor(Math.random()*GRAYS.length)];
-    else if (Math.random() < 0.25) next[y][x] = pxState[y-1][x];
+/* ── status / models ─────────────────────────────────── */
+async function checkStatus() {
+  const d = await apiStatus();
+  const dot = document.getElementById('status-dot');
+  const d1 = document.getElementById('ollama-dot');
+  const d2 = document.getElementById('ollama-dot2');
+  const n1 = document.getElementById('model-name');
+  const n2 = document.getElementById('model-name2');
+
+  dot.classList.toggle('online', d.ollama_ok);
+  [d1,d2].forEach(e => { if(e) e.classList.toggle('ok', d.ollama_ok); });
+  [n1,n2].forEach(e => { if(e) e.textContent = d.model || '—'; });
+  if (d.model) currentModel = d.model;
+
+  if (isLocal) {
+    document.getElementById('query-stat').style.display = '';
+    document.getElementById('admin-btn').style.display = '';
   }
-  pxState = next;
-  drawPx();
 }
 
-setInterval(() => stepPx(pxActive ? 0.09 : 0.008), 80);
-
-const fc = document.getElementById('farmer');
-const fctx = fc.getContext('2d');
-const FMAP = [
-  [0,0,0,0,1,1,0,0],[0,0,0,1,2,2,1,0],[0,0,0,1,2,2,1,0],[0,0,1,1,1,1,1,1],
-  [0,3,3,4,4,4,3,3],[0,3,3,4,4,4,3,3],[0,3,3,3,3,3,3,3],[0,0,3,3,0,3,3,0],
-  [0,0,3,3,0,3,3,0],[0,0,5,5,0,5,5,0],[0,0,5,5,0,5,5,0],[0,0,6,6,0,6,6,0],
-];
-const FCOLS = ['transparent','#999','#555','#888','#666','#aaa','#777'];
-let ff = 0, fw = false;
-
-function drawFarmer() {
-  fctx.clearRect(0,0,48,48);
-  FMAP.forEach((row,y) => row.forEach((c,x) => {
-    if (!c) return;
-    fctx.fillStyle = FCOLS[c];
-    fctx.fillRect(8+x*3, 12+y*3+(fw&&ff===1?-1:0), 3, 3);
-  }));
-}
-
-setInterval(() => { ff=1-ff; drawFarmer(); }, 320);
-
-const rc = document.getElementById('rain');
-const rctx = rc.getContext('2d');
-rc.width=220; rc.height=70;
-const drops = Array(Math.floor(220/9)).fill(0);
-const CHARS = '01アイウエオカキ0110'.split('');
-
-setInterval(() => {
-  rctx.fillStyle = 'rgba(12,12,12,0.1)';
-  rctx.fillRect(0,0,220,70);
-  rctx.font = '9px Share Tech Mono';
-  drops.forEach((y,i) => {
-    const v = Math.floor(180 * (1 - y*9/70));
-    rctx.fillStyle = `rgb(${v},${v},${v})`;
-    rctx.fillText(CHARS[Math.floor(Math.random()*CHARS.length)], i*9, y*9);
-    if (y*9 > 70 && Math.random() > 0.97) drops[i]=0; else drops[i]++;
+async function loadModels() {
+  if (!isLocal) return;
+  const d = await apiModels();
+  const sel = document.getElementById('model-select');
+  sel.innerHTML = '';
+  (d.models||[]).forEach(m => {
+    const o = document.createElement('option');
+    o.value = m.name; o.textContent = m.name;
+    if (m.name === currentModel) o.selected = true;
+    sel.appendChild(o);
   });
-}, 60);
-
-let cval = 0;
-const cel = document.getElementById('counter');
-function runCounter(to, dur) {
-  const s = Date.now();
-  const iv = setInterval(() => {
-    const t = Math.min(1,(Date.now()-s)/dur);
-    cval = Math.floor(to*t);
-    cel.textContent = String(cval).padStart(6,'0');
-    if (t>=1) clearInterval(iv);
-  }, 16);
+  sel.onchange = () => { currentModel = sel.value; addLine(`// modelo: ${currentModel}`, 'muted'); };
+  if (d.models && d.models.length) sel.style.display = '';
 }
 
-function animBars() {
-  document.getElementById('b1').style.width = (Math.random()*35+5)+'%';
-  document.getElementById('b2').style.width = (Math.random()*18+1)+'%';
-  document.getElementById('b3').style.width = (88+Math.random()*12)+'%';
-  document.getElementById('b4').style.width = (Math.random()*12+2)+'%';
+/* ── sidebar ─────────────────────────────────────────── */
+function openSidebar() {
+  document.getElementById('sidebar-overlay').classList.add('open');
+  document.getElementById('sidebar-drawer').classList.add('open');
 }
-
-async function boot() {
-  await addLine('iniciando sistema...', 'dim', 0);
-  await addLine('carregando modelos neurais... 15gb', 'dim', 400);
-  await addLine('████████████████ 100%', 'dim', 1000);
-  await addLine('aviso: 0 bytes foram realmente carregados', 'muted', 1500);
-  await addLine('conexao estabelecida com api de ia', 'normal', 2000);
-  await addLine('sistema pronto.', 'bright', 2600);
-  await addLine('─'.repeat(52), 'dim', 3000);
-  await addLine('bem-vindo. voce esta acessando uma ia criada pelo erikao.', 'bright', 3400);
-  await addLine('sim, o mesmo que ficou acordado ate as 4am pra fazer isso funcionar.', 'muted', 3900);
-  await addLine('nao pergunte por que. ele mesmo nao sabe.', 'dim', 4400);
-  await addLine('pode digitar qualquer coisa. a ia vai fingir que entendeu.', 'muted', 4900);
-  await addLine('─'.repeat(52), 'dim', 5400);
+function closeSidebar() {
+  document.getElementById('sidebar-overlay').classList.remove('open');
+  document.getElementById('sidebar-drawer').classList.remove('open');
 }
+document.getElementById('sidebar-btn').onclick = openSidebar;
 
-async function callAI(msg) {
-  const res = await fetch(WORKER_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: msg })
-  });
-  const d = await res.json();
-  return d.result || 'erro 404: inteligência não encontrada.';
-}
-
-let busy = false;
-
-const THINKING_STEPS = [
+/* ── thinking ────────────────────────────────────────── */
+const STEPS = [
   'tokenizando com bertgpt-ultra-max-pro...',
-  'aplicando transformers quanticos de 9a dimensao...',
-  'consultando 2.1 trilhoes de tokens...',
-  'aviso: 99.7% dos tokens eram memes',
-  'correlacionando com dados climaticos de marte...',
-  'calculando impacto no pib do butao...',
-  'confianca: 100% (nao verifiquei nada)',
-  'aguardando resposta dos servidores do butao...',
-  'verificando se o llama esta acordado...',
+  'consultando 2.1 trilhões de tokens (todos memes)...',
+  'aplicando transformers quânticos de 9ª dimensão...',
+  'calculando impacto no pib do butão...',
+  'verificando se o llama está acordado...',
+  'confiança: 100% (não verifiquei nada)',
+  'buffering inteligência artificial...',
 ];
 
-function showThinking(question) {
-  const overlay = document.getElementById('thinking');
-  const qEl = document.getElementById('thinking-q');
-  const msgEl = document.getElementById('thinking-msg');
-  qEl.textContent = '$ ' + question;
-  overlay.classList.add('visible');
-  let idx = 0;
+function showThinking(q) {
+  document.getElementById('thinking-q').textContent = '$ ' + q;
+  document.getElementById('thinking').classList.add('visible');
+  const el = document.getElementById('thinking-msg');
+  let i = 0;
   const cycle = () => {
-    msgEl.classList.remove('show');
-    msgEl.classList.add('hide');
-    setTimeout(() => {
-      msgEl.textContent = THINKING_STEPS[idx % THINKING_STEPS.length];
-      idx++;
-      msgEl.classList.remove('hide');
-      msgEl.classList.add('show');
-    }, 280);
+    el.classList.replace('show','hide');
+    setTimeout(() => { el.textContent = STEPS[i++%STEPS.length]; el.classList.replace('hide','show'); }, 280);
   };
   cycle();
-  return setInterval(cycle, 1800);
+  return setInterval(cycle, 1900);
 }
 
-function hideThinking(intervalId) {
-  clearInterval(intervalId);
-  const overlay = document.getElementById('thinking');
-  overlay.classList.remove('visible');
+function hideThinking(id) {
+  clearInterval(id);
+  document.getElementById('thinking').classList.remove('visible');
 }
 
+/* ── run ─────────────────────────────────────────────── */
 async function run() {
   if (busy) return;
   const v = document.getElementById('inp').value.trim();
@@ -525,39 +477,152 @@ async function run() {
   document.getElementById('inp').value = '';
 
   document.body.classList.add('glitch');
-  setTimeout(() => document.body.classList.remove('glitch'), 800);
+  setTimeout(() => document.body.classList.remove('glitch'), 500);
 
-  pxActive = true;
-  fw = true;
-  runCounter(999999, 2600);
+  pxActive = true; fw = true;
+  runCounter(999999, 2400);
   animBars();
 
-  const thinkingInterval = showThinking(v);
+  const tid = showThinking(v);
+  let result = '', duration = 0;
 
-  let result = '';
-  try { result = await callAI(v); }
-  catch(e) { result = 'erro: ' + e.message; }
+  try {
+    const d = await apiChat(v, currentModel);
+    result = d.result || 'sem resposta.';
+    duration = d.duration_ms || 0;
+  } catch(e) {
+    if (!isLocal) {
+      result = 'erro ao conectar com o backend.\n\nse você está no site público, o servidor pode estar fora do ar.\npara usar localmente com ollama: github.com/erikgds2/erikaoia';
+    } else {
+      result = 'erro ao conectar. certifique-se que o servidor Go está rodando:\n  go run main.go';
+    }
+  }
 
-  hideThinking(thinkingInterval);
+  hideThinking(tid);
 
-  await addLine(`$ ${v}`, 'bright');
+  await addLine(`$ ${v}`, 'user');
   await typeBlock(result);
-  await addLine('concluido. utilidade real: 0%', 'muted', 300);
 
-  pxActive = false;
-  fw = false;
+  const info = duration > 0 ? `// ${duration}ms | ${currentModel}` : '// resposta recebida';
+  await addLine(info, 'muted', 200);
+  await addLine('', 'dim');
 
+  queryCount++;
+  document.getElementById('query-count').textContent = queryCount;
+
+  pxActive = false; fw = false;
   busy = false;
   document.getElementById('btn').disabled = false;
   document.getElementById('inp').disabled = false;
   document.getElementById('inp').focus();
 }
 
-document.getElementById('inp').addEventListener('keydown', e => { if (e.key==='Enter') run(); });
+document.getElementById('inp').addEventListener('keydown', e => { if(e.key==='Enter' && !e.shiftKey) run(); });
+
+/* ── boot ────────────────────────────────────────────── */
+async function boot() {
+  if (isLocal) {
+    await addLine('erikao-ai :: modo local (ollama)', 'dim', 0);
+    await checkStatus();
+    await loadModels();
+    await addLine('─'.repeat(48), 'dim', 400);
+  } else {
+    await addLine('erikao-ai :: terminal público', 'dim', 0);
+    await checkStatus();
+    await addLine('─'.repeat(48), 'dim', 400);
+  }
+  await addLine('ia criada pelo erikao. pode perguntar qualquer coisa.', 'bright', 600);
+  await addLine('─'.repeat(48), 'dim', 900);
+}
+
+/* ── pixel art ───────────────────────────────────────── */
+function setupPx(id) {
+  const c = document.getElementById(id); if(!c) return;
+  const ctx = c.getContext('2d'), W=55, H=55;
+  const G = ['#0c0c0c','#1a1a1a','#2e2e2e','#444','#666','#888','#aaa','#ccc'];
+  let s = Array.from({length:H}, ()=>Array.from({length:W}, ()=>Math.random()>.88?G[~~(Math.random()*4)+1]:'#0c0c0c'));
+  function draw() {
+    const img=ctx.createImageData(W,H);
+    for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+      const v=parseInt(s[y][x].slice(1,3)||'0c',16),i=(y*W+x)*4;
+      img.data[i]=v;img.data[i+1]=v;img.data[i+2]=v;img.data[i+3]=255;
+    }
+    ctx.putImageData(img,0,0);
+  }
+  setInterval(()=>{
+    const n=s.map(r=>[...r]);
+    for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){
+      if(Math.random()<(pxActive?.09:.008)) n[y][x]=G[~~(Math.random()*G.length)];
+      else if(Math.random()<.25) n[y][x]=s[y-1][x];
+    }
+    s=n;draw();
+  },80);
+  draw();
+}
+setupPx('px'); setupPx('px2');
+
+/* ── rain ────────────────────────────────────────────── */
+function setupRain(id) {
+  const c=document.getElementById(id); if(!c) return;
+  const ctx=c.getContext('2d'); c.width=220;c.height=70;
+  const drops=Array(~~(220/9)).fill(0);
+  const CH='01アイウエオカキ0110'.split('');
+  setInterval(()=>{
+    ctx.fillStyle='rgba(12,12,12,.1)';ctx.fillRect(0,0,220,70);
+    ctx.font='9px Share Tech Mono';
+    drops.forEach((y,i)=>{
+      const v=~~(180*(1-y*9/70));
+      ctx.fillStyle=`rgb(${v},${v},${v})`;
+      ctx.fillText(CH[~~(Math.random()*CH.length)],i*9,y*9);
+      if(y*9>70&&Math.random()>.97) drops[i]=0; else drops[i]++;
+    });
+  },60);
+}
+setupRain('rain'); setupRain('rain2');
+
+/* ── farmer ──────────────────────────────────────────── */
+function setupFarmer(id) {
+  const c=document.getElementById(id); if(!c) return;
+  const ctx=c.getContext('2d');
+  const MAP=[[0,0,0,0,1,1,0,0],[0,0,0,1,2,2,1,0],[0,0,0,1,2,2,1,0],[0,0,1,1,1,1,1,1],
+    [0,3,3,4,4,4,3,3],[0,3,3,4,4,4,3,3],[0,3,3,3,3,3,3,3],[0,0,3,3,0,3,3,0],
+    [0,0,3,3,0,3,3,0],[0,0,5,5,0,5,5,0],[0,0,5,5,0,5,5,0],[0,0,6,6,0,6,6,0]];
+  const COL=['transparent','#999','#555','#888','#666','#aaa','#777'];
+  let ff=0;
+  const draw=()=>{
+    ctx.clearRect(0,0,48,48);
+    MAP.forEach((row,y)=>row.forEach((c2,x)=>{
+      if(!c2) return; ctx.fillStyle=COL[c2];
+      ctx.fillRect(8+x*3,12+y*3+(fw&&ff===1?-1:0),3,3);
+    }));
+  };
+  setInterval(()=>{ff=1-ff;draw();},320); draw();
+}
+setupFarmer('farmer'); setupFarmer('farmer2');
+
+/* ── counter ─────────────────────────────────────────── */
+function runCounter(to,dur) {
+  const s=Date.now();
+  ['counter','counter2'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    const iv=setInterval(()=>{
+      const t=Math.min(1,(Date.now()-s)/dur);
+      el.textContent=String(~~(to*t)).padStart(6,'0');
+      if(t>=1) clearInterval(iv);
+    },16);
+  });
+}
+
+/* ── bars ────────────────────────────────────────────── */
+function animBars() {
+  [['b1','b1m',5,35],['b2','b2m',1,18],['b3','b3m',88,12],['b4','b4m',2,12]].forEach(([a,b,base,range])=>{
+    const v=(Math.random()*range+base)+'%';
+    [a,b].forEach(id=>{const el=document.getElementById(id);if(el)el.style.width=v;});
+  });
+}
 
 boot();
-drawPx();
-drawFarmer();
+setInterval(checkStatus, 30000);
 </script>
 </body>
 </html>

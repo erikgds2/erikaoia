@@ -11,36 +11,23 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
 <style>
-/* ── reset ─────────────────────────────────────────── */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 
-/* ── vars ──────────────────────────────────────────── */
 :root{
-  --bg:#0c0c0c;
-  --bg2:#111111;
-  --fg:#b0b0b0;
-  --fg-dim:#404040;
-  --fg-bright:#e8e8e8;
-  --border:#1e1e1e;
-  --border-hi:#2e2e2e;
-  --accent:#ffffff;
-  --muted:#606060;
-  --green:#4ec94e;
-  --red:#e05050;
-  --yellow:#c8a84b;
+  --bg:#0c0c0c;--bg2:#111;
+  --fg:#b0b0b0;--fg-dim:#404040;--fg-bright:#e8e8e8;
+  --border:#1e1e1e;--border-hi:#2e2e2e;
+  --muted:#606060;--green:#4ec94e;--red:#e05050;--yellow:#c8a84b;
   --font:'Share Tech Mono',monospace;
-  --radius:3px;
-  --sidebar-w:248px;
+  --sidebar-w:240px;
 }
 
-/* ── scanlines overlay ─────────────────────────────── */
 body::before{
   content:'';position:fixed;inset:0;
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
   pointer-events:none;z-index:999;
 }
 
-/* ── base ──────────────────────────────────────────── */
 body{
   background:var(--bg);color:var(--fg);
   font-family:var(--font);font-size:13px;
@@ -48,70 +35,61 @@ body{
   display:flex;flex-direction:column;
 }
 
-/* ── topbar ────────────────────────────────────────── */
+/* topbar */
 .topbar{
-  border-bottom:1px solid var(--border);
-  padding:0 14px;height:38px;
+  border-bottom:1px solid var(--border);padding:0 14px;height:38px;
   display:flex;align-items:center;justify-content:space-between;
-  flex-shrink:0;background:var(--bg);
-  position:relative;z-index:10;
+  flex-shrink:0;background:var(--bg);z-index:10;
 }
 .topbar-brand{
   color:var(--fg-bright);letter-spacing:1px;font-size:12px;
   display:flex;align-items:center;gap:8px;
 }
-.topbar-brand .dot{
+.status-dot{
   width:7px;height:7px;border-radius:50%;
-  background:var(--fg-dim);display:inline-block;
+  background:var(--fg-dim);display:inline-block;flex-shrink:0;
 }
-.topbar-brand .dot.online{background:var(--green);}
+.status-dot.online{background:var(--green);}
 .topbar-right{display:flex;align-items:center;gap:8px;}
 .topbar-stat{font-size:10px;color:var(--muted);}
 .topbar-stat span{color:var(--fg-bright);}
 
-/* ── icon buttons ──────────────────────────────────── */
 .icon-btn{
   background:none;border:1px solid var(--border);
   color:var(--muted);width:28px;height:28px;
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-family:var(--font);font-size:14px;
-  border-radius:var(--radius);transition:all .15s;flex-shrink:0;
+  cursor:pointer;font-family:var(--font);font-size:13px;
+  border-radius:2px;transition:all .15s;flex-shrink:0;
 }
 .icon-btn:hover{border-color:var(--border-hi);color:var(--fg-bright);}
 
-/* ── body layout ───────────────────────────────────── */
-.body{flex:1;display:flex;overflow:hidden;position:relative;}
+/* layout */
+.body{flex:1;display:flex;overflow:hidden;}
 
-/* ── log area ──────────────────────────────────────── */
 .log{
   flex:1;padding:14px 16px;overflow-y:auto;
   line-height:1.75;scrollbar-width:thin;
-  scrollbar-color:var(--border) transparent;
-  min-width:0;
+  scrollbar-color:var(--border) transparent;min-width:0;
 }
 .log::-webkit-scrollbar{width:3px;}
 .log::-webkit-scrollbar-thumb{background:var(--border-hi);}
 
-/* ── message lines ─────────────────────────────────── */
+/* lines */
 .line{margin-bottom:2px;word-break:break-word;}
 .line.dim{color:var(--fg-dim);}
 .line.normal{color:var(--fg);}
 .line.bright{color:var(--fg-bright);}
 .line.muted{color:var(--muted);}
 .line.user{color:var(--fg-bright);}
-.line .ts{color:var(--fg-dim);margin-right:8px;font-size:11px;}
-.line .prompt-char{color:var(--muted);}
 
 .ai-block{
   border-left:2px solid var(--border-hi);
   padding:6px 12px;margin:8px 0 10px;
-  color:var(--fg-bright);line-height:1.8;
-  white-space:pre-wrap;
+  color:var(--fg-bright);line-height:1.8;white-space:pre-wrap;
 }
-
 .cursor::after{content:'▋';animation:blink .8s step-end infinite;}
 
-/* ── sidebar ───────────────────────────────────────── */
+/* sidebar desktop */
 .sidebar{
   width:var(--sidebar-w);border-left:1px solid var(--border);
   display:flex;flex-direction:column;align-items:center;
@@ -119,45 +97,44 @@ body{
   scrollbar-width:none;background:var(--bg);
 }
 .sidebar::-webkit-scrollbar{display:none;}
-.sid-label{
-  font-size:10px;color:var(--fg-dim);letter-spacing:2px;
-  text-transform:uppercase;align-self:flex-start;
-}
+.sid-label{font-size:10px;color:var(--fg-dim);letter-spacing:2px;text-transform:uppercase;align-self:flex-start;}
+
 canvas#px{image-rendering:pixelated;width:220px;height:220px;border:1px solid var(--border);}
 .counter{font-size:30px;letter-spacing:6px;color:var(--fg-bright);font-variant-numeric:tabular-nums;}
 canvas#rain{display:block;border:1px solid var(--border);}
+
 .bars{width:100%;display:flex;flex-direction:column;gap:6px;}
 .bar-row{display:flex;align-items:center;gap:8px;font-size:10px;}
 .bar-key{width:58px;color:var(--muted);}
 .bar-track{flex:1;height:5px;background:#1a1a1a;border:1px solid var(--border);overflow:hidden;}
 .bar-fill{height:100%;background:var(--fg);transition:width .5s ease;}
+
 canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
 .farmer-label{font-size:10px;color:var(--fg-dim);}
 
-/* ── sidebar model pill ────────────────────────────── */
 .model-pill{
   width:100%;border:1px solid var(--border);padding:6px 10px;
   font-size:10px;color:var(--muted);letter-spacing:1px;
   display:flex;justify-content:space-between;align-items:center;
 }
 .model-pill span{color:var(--fg-bright);font-size:11px;}
-.model-pill .status-dot{
+.model-pill .mpill-dot{
   width:6px;height:6px;border-radius:50%;
   background:var(--fg-dim);display:inline-block;margin-right:5px;
 }
-.model-pill .status-dot.ok{background:var(--green);}
+.model-pill .mpill-dot.ok{background:var(--green);}
 
-/* ── mobile sidebar drawer ─────────────────────────── */
+/* mobile drawer */
 .sidebar-overlay{
   display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.7);z-index:200;
+  background:rgba(0,0,0,.75);z-index:200;
   opacity:0;transition:opacity .2s;
 }
 .sidebar-overlay.open{display:block;opacity:1;}
 
 .sidebar-drawer{
   position:fixed;top:0;right:0;bottom:0;
-  width:min(var(--sidebar-w),85vw);
+  width:min(var(--sidebar-w),88vw);
   background:var(--bg);border-left:1px solid var(--border);
   display:flex;flex-direction:column;align-items:center;
   padding:14px 10px;gap:14px;overflow-y:auto;
@@ -172,10 +149,10 @@ canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
 }
 .drawer-close:hover{color:var(--fg-bright);}
 
-/* ── input bar ─────────────────────────────────────── */
+/* inputbar */
 .inputbar{
-  border-top:1px solid var(--border);
-  padding:10px 14px;display:flex;align-items:center;gap:8px;
+  border-top:1px solid var(--border);padding:10px 14px;
+  display:flex;align-items:center;gap:8px;
   flex-shrink:0;background:var(--bg);
 }
 .prompt-char{color:var(--muted);font-size:15px;flex-shrink:0;}
@@ -186,219 +163,192 @@ canvas#farmer{image-rendering:pixelated;width:72px;height:72px;}
 }
 #inp::placeholder{color:var(--fg-dim);}
 #inp:disabled{opacity:.4;}
+
 #model-select{
   background:var(--bg2);border:1px solid var(--border);
   color:var(--muted);font-family:var(--font);font-size:10px;
-  padding:4px 6px;outline:none;cursor:pointer;
-  max-width:110px;display:none;
+  padding:4px 6px;outline:none;cursor:pointer;max-width:110px;
 }
 #model-select:focus{border-color:var(--border-hi);}
+
 #btn{
   background:transparent;border:1px solid var(--border);
   color:var(--muted);font-family:var(--font);font-size:12px;
   padding:6px 14px;cursor:pointer;letter-spacing:1px;
-  transition:all .15s;flex-shrink:0;white-space:nowrap;
-  min-height:34px;
+  transition:all .15s;flex-shrink:0;white-space:nowrap;min-height:34px;
 }
 #btn:hover{border-color:var(--border-hi);color:var(--fg-bright);}
 #btn:disabled{opacity:.25;cursor:not-allowed;}
 
-/* ── thinking overlay ──────────────────────────────── */
+/* thinking */
 #thinking{
-  position:fixed;inset:0;background:rgba(12,12,12,.92);
+  position:fixed;inset:0;background:rgba(12,12,12,.93);
   z-index:500;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:20px;
   opacity:0;pointer-events:none;transition:opacity .2s;
 }
 #thinking.visible{opacity:1;pointer-events:all;}
-#thinking-q{color:var(--fg-bright);font-size:13px;letter-spacing:.5px;text-align:center;padding:0 20px;}
+#thinking-q{color:var(--fg-bright);font-size:13px;text-align:center;padding:0 24px;}
 #thinking-msg{
-  color:var(--muted);font-size:12px;letter-spacing:.5px;
-  transition:opacity .25s;min-height:20px;text-align:center;padding:0 20px;
+  color:var(--muted);font-size:11px;letter-spacing:.5px;
+  transition:opacity .25s;min-height:18px;text-align:center;padding:0 24px;
 }
-#thinking-msg.show{opacity:1;}
-#thinking-msg.hide{opacity:0;}
-.thinking-anim{display:flex;gap:6px;align-items:center;}
-.thinking-anim span{
+#thinking-msg.show{opacity:1;}#thinking-msg.hide{opacity:0;}
+.thinking-dots{display:flex;gap:6px;align-items:center;}
+.thinking-dots span{
   width:5px;height:5px;border-radius:50%;
   background:var(--muted);animation:pulse 1.4s ease-in-out infinite;
 }
-.thinking-anim span:nth-child(2){animation-delay:.2s;}
-.thinking-anim span:nth-child(3){animation-delay:.4s;}
+.thinking-dots span:nth-child(2){animation-delay:.2s;}
+.thinking-dots span:nth-child(3){animation-delay:.4s;}
 
-/* ── model selector modal ──────────────────────────── */
-#model-modal{
-  position:fixed;inset:0;background:rgba(12,12,12,.9);
-  z-index:600;display:none;align-items:center;justify-content:center;
-}
-#model-modal.open{display:flex;}
-.modal-box{
-  background:var(--bg2);border:1px solid var(--border-hi);
-  padding:20px;min-width:260px;max-width:90vw;
-}
-.modal-title{color:var(--fg-bright);font-size:12px;letter-spacing:2px;margin-bottom:14px;}
-.modal-item{
-  padding:9px 12px;border:1px solid var(--border);
-  margin-bottom:6px;cursor:pointer;font-size:12px;
-  transition:all .15s;display:flex;justify-content:space-between;
-  align-items:center;
-}
-.modal-item:hover{border-color:var(--fg-dim);color:var(--fg-bright);}
-.modal-item.active{border-color:var(--muted);color:var(--fg-bright);}
-.modal-item .model-size{color:var(--fg-dim);font-size:10px;}
-.modal-cancel{
-  margin-top:10px;width:100%;padding:8px;background:none;
-  border:1px solid var(--border);color:var(--muted);
-  font-family:var(--font);font-size:11px;cursor:pointer;letter-spacing:1px;
-}
-.modal-cancel:hover{color:var(--fg-bright);}
-
-/* ── animations ────────────────────────────────────── */
+/* animations */
 @keyframes blink{50%{opacity:0;}}
 @keyframes pulse{0%,100%{opacity:.3;transform:scale(.8);}50%{opacity:1;transform:scale(1);}}
-.glitch{animation:glitch .25s steps(1) 4;}
+.glitch{animation:glitch .3s steps(1) 3;}
 @keyframes glitch{
-  0%{filter:none;}25%{filter:invert(.05) hue-rotate(180deg);}
-  50%{filter:none;}75%{filter:invert(.03);}100%{filter:none;}
+  0%{filter:none;}33%{filter:invert(.04) hue-rotate(90deg);}
+  66%{filter:none;}100%{filter:invert(.02);}
 }
 
-/* ── mobile layout ─────────────────────────────────── */
+/* mobile */
 @media(max-width:768px){
-  body{font-size:13px;}
   .sidebar{display:none;}
+  .topbar-stat{display:none;}
   .topbar{padding:0 10px;}
-  .log{padding:12px 12px 90px;}
+  .log{padding:12px 12px 80px;}
   .inputbar{
-    position:fixed;bottom:0;left:0;right:0;
-    padding:10px 12px;border-top:1px solid var(--border);
-    background:var(--bg);
-    padding-bottom:max(10px,env(safe-area-inset-bottom));
+    padding-bottom:max(10px, env(safe-area-inset-bottom));
   }
   #inp{font-size:16px;}
-  #btn{padding:6px 12px;font-size:11px;}
-  .topbar-stat{display:none;}
+  #model-select{display:none;}
+  #btn{padding:6px 12px;}
 }
-
 @media(min-width:769px){
   .icon-btn.mobile-only{display:none;}
-  #model-select{display:block;}
 }
 </style>
 </head>
 <body>
 
-<!-- topbar -->
 <div class="topbar">
   <div class="topbar-brand">
-    <div class="dot" id="status-dot"></div>
+    <div class="status-dot" id="status-dot"></div>
     erikao :: ai terminal
   </div>
   <div class="topbar-right">
-    <span class="topbar-stat" id="uptime-stat">uptime <span id="uptime">00:00:00</span></span>
-    <span class="topbar-stat" id="queries-stat">queries <span id="query-count">0</span></span>
-    <button class="icon-btn" id="admin-btn" title="painel admin" onclick="window.open('/admin.html','_blank')">⌘</button>
-    <button class="icon-btn mobile-only" id="sidebar-toggle-btn" title="neural core">◈</button>
+    <span class="topbar-stat">uptime <span id="uptime">00:00:00</span></span>
+    <span class="topbar-stat" id="query-stat" style="display:none">queries <span id="query-count">0</span></span>
+    <button class="icon-btn" id="admin-btn" title="admin" style="display:none" onclick="window.open('/admin.html','_blank')">⌘</button>
+    <button class="icon-btn mobile-only" id="sidebar-btn" title="neural core">◈</button>
   </div>
 </div>
 
-<!-- body -->
 <div class="body">
-
-  <!-- log -->
   <div class="log" id="log"></div>
 
-  <!-- desktop sidebar -->
   <div class="sidebar" id="sidebar-desktop">
     <div class="sid-label">neural core</div>
     <canvas id="px" width="55" height="55"></canvas>
-
     <div class="model-pill" id="model-pill">
-      <div><span class="status-dot" id="ollama-dot"></span>ollama</div>
+      <div><span class="mpill-dot" id="ollama-dot"></span>backend</div>
       <span id="model-name">—</span>
     </div>
-
     <div class="counter" id="counter">000000</div>
-
     <div class="sid-label">matrix</div>
     <canvas id="rain" width="220" height="70"></canvas>
-
     <div class="sid-label">métricas</div>
     <div class="bars">
       <div class="bar-row"><span class="bar-key">intelig.</span><div class="bar-track"><div class="bar-fill" id="b1" style="width:5%"></div></div></div>
       <div class="bar-row"><span class="bar-key">utilid.</span><div class="bar-track"><div class="bar-fill" id="b2" style="width:2%"></div></div></div>
-      <div class="bar-row"><span class="bar-key">cafeína</span><div class="bar-track"><div class="bar-fill" id="b3" style="width:90%"></div></div></div>
+      <div class="bar-row"><span class="bar-key">cafeína</span><div class="bar-track"><div class="bar-fill" id="b3" style="width:92%"></div></div></div>
       <div class="bar-row"><span class="bar-key">budget</span><div class="bar-track"><div class="bar-fill" id="b4" style="width:3%"></div></div></div>
     </div>
-
     <div class="sid-label">agente em campo</div>
     <canvas id="farmer" width="48" height="48"></canvas>
     <span class="farmer-label">erikao.exe</span>
   </div>
-
 </div>
 
-<!-- mobile sidebar overlay -->
+<!-- mobile overlay -->
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
-
-<!-- mobile sidebar drawer (cloned content) -->
 <div class="sidebar-drawer" id="sidebar-drawer">
   <button class="drawer-close" onclick="closeSidebar()">[ fechar ]</button>
   <div class="sid-label">neural core</div>
   <canvas id="px2" width="55" height="55"></canvas>
-
   <div class="model-pill">
-    <div><span class="status-dot" id="ollama-dot2"></span>ollama</div>
+    <div><span class="mpill-dot" id="ollama-dot2"></span>backend</div>
     <span id="model-name2">—</span>
   </div>
-
   <div class="counter" id="counter2">000000</div>
-
   <div class="sid-label">matrix</div>
   <canvas id="rain2" width="220" height="70"></canvas>
-
   <div class="sid-label">métricas</div>
   <div class="bars">
     <div class="bar-row"><span class="bar-key">intelig.</span><div class="bar-track"><div class="bar-fill" id="b1m" style="width:5%"></div></div></div>
     <div class="bar-row"><span class="bar-key">utilid.</span><div class="bar-track"><div class="bar-fill" id="b2m" style="width:2%"></div></div></div>
-    <div class="bar-row"><span class="bar-key">cafeína</span><div class="bar-track"><div class="bar-fill" id="b3m" style="width:90%"></div></div></div>
+    <div class="bar-row"><span class="bar-key">cafeína</span><div class="bar-track"><div class="bar-fill" id="b3m" style="width:92%"></div></div></div>
     <div class="bar-row"><span class="bar-key">budget</span><div class="bar-track"><div class="bar-fill" id="b4m" style="width:3%"></div></div></div>
   </div>
-
   <div class="sid-label">agente em campo</div>
   <canvas id="farmer2" width="48" height="48"></canvas>
   <span class="farmer-label">erikao.exe</span>
 </div>
 
-<!-- input bar -->
 <div class="inputbar">
   <span class="prompt-char">$</span>
-  <input id="inp" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="digite sua mensagem...">
-  <select id="model-select" title="modelo ollama"></select>
+  <input id="inp" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="mensagem...">
+  <select id="model-select"></select>
   <button id="btn" onclick="run()">executar</button>
 </div>
 
-<!-- thinking overlay -->
 <div id="thinking">
-  <div class="thinking-anim"><span></span><span></span><span></span></div>
+  <div class="thinking-dots"><span></span><span></span><span></span></div>
   <div id="thinking-q"></div>
-  <div id="thinking-msg" class="show">inicializando...</div>
-</div>
-
-<!-- model modal -->
-<div id="model-modal">
-  <div class="modal-box">
-    <div class="modal-title">// selecionar modelo</div>
-    <div id="model-list"></div>
-    <button class="modal-cancel" onclick="closeModelModal()">[ cancelar ]</button>
-  </div>
+  <div id="thinking-msg" class="show"></div>
 </div>
 
 <script>
-/* ── config ──────────────────────────────────────────── */
-const API = '';  // relativo — Go server serve o frontend
+/* ── backend detection ───────────────────────────────── */
+const isLocal = ['localhost','127.0.0.1'].includes(location.hostname);
+const WORKER_URL = 'https://mute-union-71ff.erikgds.workers.dev';
+
+async function apiChat(message, model) {
+  if (isLocal) {
+    const r = await fetch('/api/chat', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message, model})
+    });
+    return r.json();
+  }
+  const r = await fetch(WORKER_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message})
+  });
+  const d = await r.json();
+  return {result: d.result || d.response || 'sem resposta.', model:'worker', duration_ms:0};
+}
+
+async function apiStatus() {
+  if (!isLocal) return {ollama_ok:true, model:'worker', total_queries:0};
+  try {
+    const r = await fetch('/api/status');
+    return r.json();
+  } catch { return {ollama_ok:false, model:'—', total_queries:0}; }
+}
+
+async function apiModels() {
+  if (!isLocal) return {models:[]};
+  try {
+    const r = await fetch('/api/models');
+    return r.json();
+  } catch { return {models:[]}; }
+}
 
 /* ── state ───────────────────────────────────────────── */
-let currentModel = 'llama3.2';
+let currentModel = 'llama3.2:latest';
 let queryCount = 0;
 let startTime = Date.now();
 let busy = false;
@@ -407,15 +357,14 @@ let fw = false;
 
 /* ── uptime ──────────────────────────────────────────── */
 setInterval(() => {
-  const s = Math.floor((Date.now() - startTime) / 1000);
-  const h = String(Math.floor(s / 3600)).padStart(2, '0');
-  const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
-  const sec = String(s % 60).padStart(2, '0');
-  document.getElementById('uptime').textContent = `${h}:${m}:${sec}`;
+  const s = Math.floor((Date.now()-startTime)/1000);
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('uptime').textContent =
+    `${pad(Math.floor(s/3600))}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`;
 }, 1000);
 
 /* ── log helpers ─────────────────────────────────────── */
-function addLine(text, cls = 'normal', delay = 0) {
+function addLine(text, cls='normal', delay=0) {
   return new Promise(res => setTimeout(() => {
     const log = document.getElementById('log');
     const el = document.createElement('div');
@@ -433,83 +382,50 @@ async function typeBlock(text) {
   el.className = 'ai-block cursor';
   el.textContent = '';
   log.appendChild(el);
-  log.scrollTop = log.scrollHeight;
-
-  const chars = text.split('');
-  const chunkSize = 3;
-  for (let i = 0; i < chars.length; i += chunkSize) {
-    await new Promise(r => setTimeout(r, 12));
-    el.textContent += chars.slice(i, i + chunkSize).join('');
+  for (let i = 0; i < text.length; i += 4) {
+    await new Promise(r => setTimeout(r, 10));
+    el.textContent += text.slice(i, i+4);
     log.scrollTop = log.scrollHeight;
   }
   el.classList.remove('cursor');
 }
 
-/* ── ollama status ───────────────────────────────────── */
+/* ── status / models ─────────────────────────────────── */
 async function checkStatus() {
-  try {
-    const r = await fetch(API + '/api/status');
-    if (!r.ok) throw new Error();
-    const d = await r.json();
-    const dot = document.getElementById('status-dot');
-    const dot1 = document.getElementById('ollama-dot');
-    const dot2 = document.getElementById('ollama-dot2');
-    const n1 = document.getElementById('model-name');
-    const n2 = document.getElementById('model-name2');
-    const qc = document.getElementById('query-count');
-
-    dot.classList.toggle('online', d.ollama_ok);
-    [dot1, dot2].forEach(d2 => { if (d2) d2.classList.toggle('ok', d.ollama_ok); });
-    [n1, n2].forEach(n => { if (n) n.textContent = d.model; });
-    currentModel = d.model;
-    if (qc) qc.textContent = d.total_queries;
-    queryCount = d.total_queries;
-  } catch {}
-}
-
-/* ── model list ──────────────────────────────────────── */
-async function loadModels() {
-  try {
-    const r = await fetch(API + '/api/models');
-    if (!r.ok) return;
-    const d = await r.json();
-    const sel = document.getElementById('model-select');
-    const list = document.getElementById('model-list');
-    sel.innerHTML = '';
-    list.innerHTML = '';
-
-    (d.models || []).forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m.name;
-      opt.textContent = m.name;
-      if (m.name === currentModel) opt.selected = true;
-      sel.appendChild(opt);
-
-      const item = document.createElement('div');
-      item.className = 'modal-item' + (m.name === currentModel ? ' active' : '');
-      const sizeMB = m.size ? (m.size / 1e9).toFixed(1) + ' GB' : '';
-      item.innerHTML = `<span>${m.name}</span><span class="model-size">${sizeMB}</span>`;
-      item.onclick = () => { selectModel(m.name); closeModelModal(); };
-      list.appendChild(item);
-    });
-
-    sel.onchange = () => selectModel(sel.value);
-  } catch {}
-}
-
-function selectModel(name) {
-  currentModel = name;
+  const d = await apiStatus();
+  const dot = document.getElementById('status-dot');
+  const d1 = document.getElementById('ollama-dot');
+  const d2 = document.getElementById('ollama-dot2');
   const n1 = document.getElementById('model-name');
   const n2 = document.getElementById('model-name2');
-  [n1, n2].forEach(n => { if (n) n.textContent = name; });
-  const sel = document.getElementById('model-select');
-  if (sel) sel.value = name;
-  addLine(`// modelo alterado: ${name}`, 'muted');
+
+  dot.classList.toggle('online', d.ollama_ok);
+  [d1,d2].forEach(e => { if(e) e.classList.toggle('ok', d.ollama_ok); });
+  [n1,n2].forEach(e => { if(e) e.textContent = d.model || '—'; });
+  if (d.model) currentModel = d.model;
+
+  if (isLocal) {
+    document.getElementById('query-stat').style.display = '';
+    document.getElementById('admin-btn').style.display = '';
+  }
 }
 
-function closeModelModal() { document.getElementById('model-modal').classList.remove('open'); }
+async function loadModels() {
+  if (!isLocal) return;
+  const d = await apiModels();
+  const sel = document.getElementById('model-select');
+  sel.innerHTML = '';
+  (d.models||[]).forEach(m => {
+    const o = document.createElement('option');
+    o.value = m.name; o.textContent = m.name;
+    if (m.name === currentModel) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.onchange = () => { currentModel = sel.value; addLine(`// modelo: ${currentModel}`, 'muted'); };
+  if (d.models && d.models.length) sel.style.display = '';
+}
 
-/* ── sidebar drawer ──────────────────────────────────── */
+/* ── sidebar ─────────────────────────────────────────── */
 function openSidebar() {
   document.getElementById('sidebar-overlay').classList.add('open');
   document.getElementById('sidebar-drawer').classList.add('open');
@@ -518,32 +434,27 @@ function closeSidebar() {
   document.getElementById('sidebar-overlay').classList.remove('open');
   document.getElementById('sidebar-drawer').classList.remove('open');
 }
-document.getElementById('sidebar-toggle-btn').onclick = openSidebar;
+document.getElementById('sidebar-btn').onclick = openSidebar;
 
-/* ── thinking overlay ────────────────────────────────── */
-const THINKING_STEPS = [
+/* ── thinking ────────────────────────────────────────── */
+const STEPS = [
   'tokenizando com bertgpt-ultra-max-pro...',
-  'aplicando transformers quânticos de 9ª dimensão...',
   'consultando 2.1 trilhões de tokens (todos memes)...',
-  'correlacionando com dados climáticos de marte...',
+  'aplicando transformers quânticos de 9ª dimensão...',
   'calculando impacto no pib do butão...',
-  'aguardando llama acordar...',
+  'verificando se o llama está acordado...',
   'confiança: 100% (não verifiquei nada)',
-  'verificando se o erikao tá dormindo...',
   'buffering inteligência artificial...',
 ];
 
-function showThinking(question) {
-  document.getElementById('thinking-q').textContent = '$ ' + question;
+function showThinking(q) {
+  document.getElementById('thinking-q').textContent = '$ ' + q;
   document.getElementById('thinking').classList.add('visible');
-  let idx = 0;
-  const msgEl = document.getElementById('thinking-msg');
+  const el = document.getElementById('thinking-msg');
+  let i = 0;
   const cycle = () => {
-    msgEl.classList.replace('show', 'hide');
-    setTimeout(() => {
-      msgEl.textContent = THINKING_STEPS[idx++ % THINKING_STEPS.length];
-      msgEl.classList.replace('hide', 'show');
-    }, 280);
+    el.classList.replace('show','hide');
+    setTimeout(() => { el.textContent = STEPS[i++%STEPS.length]; el.classList.replace('hide','show'); }, 280);
   };
   cycle();
   return setInterval(cycle, 1900);
@@ -566,34 +477,34 @@ async function run() {
   document.getElementById('inp').value = '';
 
   document.body.classList.add('glitch');
-  setTimeout(() => document.body.classList.remove('glitch'), 600);
+  setTimeout(() => document.body.classList.remove('glitch'), 500);
 
   pxActive = true; fw = true;
   runCounter(999999, 2400);
   animBars();
 
-  const thinkId = showThinking(v);
-
+  const tid = showThinking(v);
   let result = '', duration = 0;
+
   try {
-    const res = await fetch(API + '/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: v, model: currentModel })
-    });
-    const d = await res.json();
+    const d = await apiChat(v, currentModel);
     result = d.result || 'sem resposta.';
     duration = d.duration_ms || 0;
-    if (d.error) result = `[erro] ${d.result}`;
-  } catch (e) {
-    result = `[erro de conexão] certifique-se que o servidor Go está rodando (go run main.go)`;
+  } catch(e) {
+    if (!isLocal) {
+      result = 'erro ao conectar com o backend.\n\nse você está no site público, o servidor pode estar fora do ar.\npara usar localmente com ollama: github.com/erikgds2/erikaoia';
+    } else {
+      result = 'erro ao conectar. certifique-se que o servidor Go está rodando:\n  go run main.go';
+    }
   }
 
-  hideThinking(thinkId);
+  hideThinking(tid);
 
   await addLine(`$ ${v}`, 'user');
   await typeBlock(result);
-  await addLine(`// concluído em ${duration}ms | modelo: ${currentModel}`, 'muted', 200);
+
+  const info = duration > 0 ? `// ${duration}ms | ${currentModel}` : '// resposta recebida';
+  await addLine(info, 'muted', 200);
   await addLine('', 'dim');
 
   queryCount++;
@@ -606,135 +517,110 @@ async function run() {
   document.getElementById('inp').focus();
 }
 
-document.getElementById('inp').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) run(); });
+document.getElementById('inp').addEventListener('keydown', e => { if(e.key==='Enter' && !e.shiftKey) run(); });
 
-/* ── boot sequence ───────────────────────────────────── */
+/* ── boot ────────────────────────────────────────────── */
 async function boot() {
-  await addLine('erikao-ai v2.0 :: golang + ollama', 'dim', 0);
-  await addLine('iniciando sistema local...', 'dim', 300);
-  await addLine('conectando ao servidor Go em localhost:8080...', 'dim', 700);
-  await checkStatus();
-  await loadModels();
-  await addLine('modelos neurais carregados.', 'dim', 1200);
-  await addLine('aviso: 0 bytes foram enviados para a nuvem', 'muted', 1600);
-  await addLine('tudo roda no seu PC. privacidade máxima.', 'muted', 2000);
-  await addLine('─'.repeat(52), 'dim', 2400);
-  await addLine('bem-vindo. você está acessando uma ia criada pelo erikao.', 'bright', 2800);
-  await addLine('sim, o mesmo que ficou acordado até as 4am pra fazer isso funcionar.', 'muted', 3300);
-  await addLine('pode digitar qualquer coisa.', 'dim', 3800);
-  await addLine('─'.repeat(52), 'dim', 4200);
+  if (isLocal) {
+    await addLine('erikao-ai :: modo local (ollama)', 'dim', 0);
+    await checkStatus();
+    await loadModels();
+    await addLine('─'.repeat(48), 'dim', 400);
+  } else {
+    await addLine('erikao-ai :: terminal público', 'dim', 0);
+    await checkStatus();
+    await addLine('─'.repeat(48), 'dim', 400);
+  }
+  await addLine('ia criada pelo erikao. pode perguntar qualquer coisa.', 'bright', 600);
+  await addLine('─'.repeat(48), 'dim', 900);
 }
 
 /* ── pixel art ───────────────────────────────────────── */
 function setupPx(id) {
-  const c = document.getElementById(id);
-  if (!c) return null;
-  const ctx = c.getContext('2d');
-  const W = 55, H = 55;
-  const GRAYS = ['#0c0c0c','#1a1a1a','#2e2e2e','#444','#666','#888','#aaa','#ccc'];
-  let state = Array.from({length:H}, () => Array.from({length:W}, () => Math.random() > .88 ? GRAYS[Math.floor(Math.random()*4)+1] : '#0c0c0c'));
-
+  const c = document.getElementById(id); if(!c) return;
+  const ctx = c.getContext('2d'), W=55, H=55;
+  const G = ['#0c0c0c','#1a1a1a','#2e2e2e','#444','#666','#888','#aaa','#ccc'];
+  let s = Array.from({length:H}, ()=>Array.from({length:W}, ()=>Math.random()>.88?G[~~(Math.random()*4)+1]:'#0c0c0c'));
   function draw() {
-    const img = ctx.createImageData(W, H);
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      const h = state[y][x]; const v = parseInt(h.slice(1,3)||'0c', 16);
-      const i = (y*W+x)*4; img.data[i]=v; img.data[i+1]=v; img.data[i+2]=v; img.data[i+3]=255;
+    const img=ctx.createImageData(W,H);
+    for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+      const v=parseInt(s[y][x].slice(1,3)||'0c',16),i=(y*W+x)*4;
+      img.data[i]=v;img.data[i+1]=v;img.data[i+2]=v;img.data[i+3]=255;
     }
-    ctx.putImageData(img, 0, 0);
+    ctx.putImageData(img,0,0);
   }
-
-  function step(intensity) {
-    const next = state.map(r=>[...r]);
-    for (let y=1;y<H-1;y++) for (let x=1;x<W-1;x++) {
-      if (Math.random() < intensity) next[y][x] = GRAYS[Math.floor(Math.random()*GRAYS.length)];
-      else if (Math.random() < .25) next[y][x] = state[y-1][x];
+  setInterval(()=>{
+    const n=s.map(r=>[...r]);
+    for(let y=1;y<H-1;y++) for(let x=1;x<W-1;x++){
+      if(Math.random()<(pxActive?.09:.008)) n[y][x]=G[~~(Math.random()*G.length)];
+      else if(Math.random()<.25) n[y][x]=s[y-1][x];
     }
-    state = next; draw();
-  }
-
-  setInterval(() => step(pxActive ? .09 : .008), 80);
+    s=n;draw();
+  },80);
   draw();
 }
-
-setupPx('px');
-setupPx('px2');
+setupPx('px'); setupPx('px2');
 
 /* ── rain ────────────────────────────────────────────── */
 function setupRain(id) {
-  const c = document.getElementById(id);
-  if (!c) return;
-  const ctx = c.getContext('2d');
-  c.width = 220; c.height = 70;
-  const drops = Array(Math.floor(220/9)).fill(0);
-  const CHARS = '01アイウエオカキ0110'.split('');
-  setInterval(() => {
-    ctx.fillStyle = 'rgba(12,12,12,.1)';
-    ctx.fillRect(0,0,220,70);
-    ctx.font = '9px Share Tech Mono';
-    drops.forEach((y,i) => {
-      const v = Math.floor(180*(1-y*9/70));
-      ctx.fillStyle = `rgb(${v},${v},${v})`;
-      ctx.fillText(CHARS[Math.floor(Math.random()*CHARS.length)], i*9, y*9);
-      if (y*9>70 && Math.random()>.97) drops[i]=0; else drops[i]++;
+  const c=document.getElementById(id); if(!c) return;
+  const ctx=c.getContext('2d'); c.width=220;c.height=70;
+  const drops=Array(~~(220/9)).fill(0);
+  const CH='01アイウエオカキ0110'.split('');
+  setInterval(()=>{
+    ctx.fillStyle='rgba(12,12,12,.1)';ctx.fillRect(0,0,220,70);
+    ctx.font='9px Share Tech Mono';
+    drops.forEach((y,i)=>{
+      const v=~~(180*(1-y*9/70));
+      ctx.fillStyle=`rgb(${v},${v},${v})`;
+      ctx.fillText(CH[~~(Math.random()*CH.length)],i*9,y*9);
+      if(y*9>70&&Math.random()>.97) drops[i]=0; else drops[i]++;
     });
-  }, 60);
+  },60);
 }
+setupRain('rain'); setupRain('rain2');
 
-setupRain('rain');
-setupRain('rain2');
-
-/* ── farmer sprite ───────────────────────────────────── */
+/* ── farmer ──────────────────────────────────────────── */
 function setupFarmer(id) {
-  const c = document.getElementById(id);
-  if (!c) return;
-  const ctx = c.getContext('2d');
-  const FMAP = [
-    [0,0,0,0,1,1,0,0],[0,0,0,1,2,2,1,0],[0,0,0,1,2,2,1,0],[0,0,1,1,1,1,1,1],
+  const c=document.getElementById(id); if(!c) return;
+  const ctx=c.getContext('2d');
+  const MAP=[[0,0,0,0,1,1,0,0],[0,0,0,1,2,2,1,0],[0,0,0,1,2,2,1,0],[0,0,1,1,1,1,1,1],
     [0,3,3,4,4,4,3,3],[0,3,3,4,4,4,3,3],[0,3,3,3,3,3,3,3],[0,0,3,3,0,3,3,0],
-    [0,0,3,3,0,3,3,0],[0,0,5,5,0,5,5,0],[0,0,5,5,0,5,5,0],[0,0,6,6,0,6,6,0],
-  ];
-  const FCOLS = ['transparent','#999','#555','#888','#666','#aaa','#777'];
-  let ff = 0;
-  function draw() {
+    [0,0,3,3,0,3,3,0],[0,0,5,5,0,5,5,0],[0,0,5,5,0,5,5,0],[0,0,6,6,0,6,6,0]];
+  const COL=['transparent','#999','#555','#888','#666','#aaa','#777'];
+  let ff=0;
+  const draw=()=>{
     ctx.clearRect(0,0,48,48);
-    FMAP.forEach((row,y) => row.forEach((col,x) => {
-      if (!col) return;
-      ctx.fillStyle = FCOLS[col];
-      ctx.fillRect(8+x*3, 12+y*3+(fw&&ff===1?-1:0), 3, 3);
+    MAP.forEach((row,y)=>row.forEach((c2,x)=>{
+      if(!c2) return; ctx.fillStyle=COL[c2];
+      ctx.fillRect(8+x*3,12+y*3+(fw&&ff===1?-1:0),3,3);
     }));
-  }
-  setInterval(() => { ff=1-ff; draw(); }, 320);
-  draw();
+  };
+  setInterval(()=>{ff=1-ff;draw();},320); draw();
 }
-
-setupFarmer('farmer');
-setupFarmer('farmer2');
+setupFarmer('farmer'); setupFarmer('farmer2');
 
 /* ── counter ─────────────────────────────────────────── */
-function runCounter(to, dur) {
-  const s = Date.now();
-  ['counter','counter2'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const iv = setInterval(() => {
-      const t = Math.min(1,(Date.now()-s)/dur);
-      el.textContent = String(Math.floor(to*t)).padStart(6,'0');
-      if (t>=1) clearInterval(iv);
-    }, 16);
+function runCounter(to,dur) {
+  const s=Date.now();
+  ['counter','counter2'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    const iv=setInterval(()=>{
+      const t=Math.min(1,(Date.now()-s)/dur);
+      el.textContent=String(~~(to*t)).padStart(6,'0');
+      if(t>=1) clearInterval(iv);
+    },16);
   });
 }
 
 /* ── bars ────────────────────────────────────────────── */
 function animBars() {
-  [['b1','b1m'],['.'+Math.random()*35+5],[['b2','b2m']],[['b3','b3m']],[['b4','b4m']]].forEach(() => {});
-  const pairs = [['b1','b1m',35,5],['b2','b2m',18,1],['b3','b3m',12,88],['b4','b4m',12,2]];
-  pairs.forEach(([a,b,range,base]) => {
-    const v = (Math.random()*range+base)+'%';
-    [a,b].forEach(id => { const el=document.getElementById(id); if(el) el.style.width=v; });
+  [['b1','b1m',5,35],['b2','b2m',1,18],['b3','b3m',88,12],['b4','b4m',2,12]].forEach(([a,b,base,range])=>{
+    const v=(Math.random()*range+base)+'%';
+    [a,b].forEach(id=>{const el=document.getElementById(id);if(el)el.style.width=v;});
   });
 }
 
-/* ── init ────────────────────────────────────────────── */
 boot();
 setInterval(checkStatus, 30000);
 </script>
