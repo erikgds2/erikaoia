@@ -315,7 +315,7 @@ async function resolveBackend() {
     if (!cfg.backend) return false;
     BACKEND = cfg.backend.replace(/\/$/, '');
     // test reachability
-    const r = await fetch(BACKEND + '/api/status', {signal: AbortSignal.timeout(5000)});
+    const r = await fetch(BACKEND + '/api/status', {signal: AbortSignal.timeout(5000), headers:{'ngrok-skip-browser-warning':'1'}});
     return r.ok;
   } catch { return false; }
 }
@@ -323,19 +323,19 @@ async function resolveBackend() {
 async function apiChat(message, model) {
   const r = await fetch(BACKEND + '/api/chat', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: {'Content-Type': 'application/json', 'ngrok-skip-browser-warning': '1'},
     body: JSON.stringify({message, model})
   });
   return r.json();
 }
 
 async function apiStatus() {
-  const r = await fetch(BACKEND + '/api/status', {signal: AbortSignal.timeout(4000)});
+  const r = await fetch(BACKEND + '/api/status', {signal: AbortSignal.timeout(4000), headers:{'ngrok-skip-browser-warning':'1'}});
   return r.json();
 }
 
 async function apiModels() {
-  const r = await fetch(BACKEND + '/api/models', {signal: AbortSignal.timeout(4000)});
+  const r = await fetch(BACKEND + '/api/models', {signal: AbortSignal.timeout(4000), headers:{'ngrok-skip-browser-warning':'1'}});
   return r.json();
 }
 

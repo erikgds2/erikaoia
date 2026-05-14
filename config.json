@@ -1,4 +1,3 @@
 {
-  "backend": "",
-  "note": "Preencha 'backend' com sua URL ngrok estatica. Ex: https://erikaoia.ngrok-free.app"
+  "backend": "https://hypnoidal-velia-acrimoniously.ngrok-free.dev"
 }
